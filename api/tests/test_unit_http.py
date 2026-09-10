@@ -2,19 +2,19 @@ import asyncio
 import io
 import threading
 import unittest
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import httpx
-from fastapi import HTTPException, UploadFile
-from fastapi.testclient import TestClient
-from pypdf import PdfWriter
-from support import configured
-from app.core.errors import InvalidDocument, ProviderError
+from app.core.errors import InvalidDocument, ProviderError, QueueUnavailable
 from app.core.metrics import http_requests_total
 from app.core.upload_limit import UploadLimitMiddleware
 from app.main import app
 from app.routers.documents import upload_document
 from app.services.ingestion import extract_text
+from fastapi import HTTPException, UploadFile
+from fastapi.testclient import TestClient
+from pypdf import PdfWriter
+from support import configured
 
 
 class HttpTests(unittest.TestCase):
@@ -62,10 +62,41 @@ class HttpTests(unittest.TestCase):
 
         stream = GuardedFile(b"12345")
         with configured(max_upload_bytes=4), self.assertRaises(HTTPException) as raised:
-            upload_document(UploadFile(filename="test.txt", file=stream))
+            asyncio.run(upload_document(UploadFile(filename="test.txt", file=stream)))
         self.assertEqual(raised.exception.status_code, 413)
         self.assertEqual(stream.requested, 5)
         self.assertTrue(stream.closed)
+
+    def test_upload_returns_202_pending_after_enqueue(self):
+        enqueue = AsyncMock(return_value="ingest-7")
+        with (
+            patch("app.routers.documents._create_pending_document", return_value=7),
+            patch("app.routers.documents.enqueue_document", enqueue),
+        ):
+            response = TestClient(app).post(
+                "/documents", files={"file": ("valid.txt", b"useful content")}
+            )
+        self.assertEqual(response.status_code, 202, response.text)
+        self.assertEqual(response.json()["status"], "pending")
+        self.assertEqual(response.json()["chunk_count"], 0)
+        enqueue.assert_awaited_once_with(7, "valid.txt", b"useful content")
+
+    def test_enqueue_failure_is_sanitized_and_pending_row_is_removed(self):
+        cleanup = patch("app.routers.documents._delete_pending_document")
+        with (
+            patch("app.routers.documents._create_pending_document", return_value=8),
+            patch(
+                "app.routers.documents.enqueue_document",
+                AsyncMock(side_effect=QueueUnavailable()),
+            ),
+            cleanup as remove,
+        ):
+            response = TestClient(app).post(
+                "/documents", files={"file": ("valid.txt", b"useful content")}
+            )
+        self.assertEqual(response.status_code, 503, response.text)
+        self.assertEqual(response.json()["code"], "queue_unavailable")
+        remove.assert_called_once_with(8)
 
     def test_invalid_documents_and_blank_pdf_are_422_errors(self):
         writer, output = PdfWriter(), io.BytesIO()
@@ -91,7 +122,8 @@ class HttpTests(unittest.TestCase):
         for i in range(20):
             client.request(f"UNKNOWN{i}", f"/unknown-{i}")
         with patch("app.routers.documents.get_conn") as get_conn:
-            get_conn.return_value.__enter__.return_value.execute.return_value.fetchone.return_value = None
+            execute = get_conn.return_value.__enter__.return_value.execute
+            execute.return_value.fetchone.return_value = None
             for i in range(20):
                 client.delete(f"/documents/{1000 + i}")
         labels = [

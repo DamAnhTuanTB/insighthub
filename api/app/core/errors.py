@@ -46,3 +46,9 @@ class SchemaMismatch(ServiceError):
     status_code = 503
     code = "schema_mismatch"
     message = "Schema chưa sẵn sàng hoặc dimension không khớp EMBEDDING_DIM."
+
+
+class QueueUnavailable(ServiceError):
+    status_code = 503
+    code = "queue_unavailable"
+    message = "Hàng đợi xử lý tài liệu tạm thời không khả dụng."

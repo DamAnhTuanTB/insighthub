@@ -26,6 +26,7 @@ class Settings(BaseSettings):
         default="postgresql://insighthub:insighthub@postgres:5432/insighthub",
         repr=False,
     )
+    redis_url: str = Field(default="redis://redis:6379/0", min_length=1, repr=False)
     rag_mode: Literal["fixture", "real"] = "real"
     llm_provider: Literal["gemini", "anthropic", "ollama", "openai", "fixture"] = (
         "gemini"
@@ -90,7 +91,8 @@ class Settings(BaseSettings):
                     or parsed.fragment
                 ):
                     raise ValueError(
-                        f"{provider.upper()}_BASE_URL must be an explicit HTTP(S) URL without credentials/query"
+                        f"{provider.upper()}_BASE_URL must be an explicit HTTP(S) URL "
+                        "without credentials/query"
                     )
                 try:
                     parsed.port

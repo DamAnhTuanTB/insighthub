@@ -6,23 +6,19 @@ No paid providers are called. A missing DB/schema fixture fails an opted-in run.
 
 import concurrent.futures
 import os
-from pathlib import Path
 import threading
 import unittest
 import uuid
+from pathlib import Path
 from unittest.mock import patch
 
-from support import configured, real_config
 import psycopg
-from psycopg import sql
-from psycopg_pool import ConnectionPool
-from fastapi.testclient import TestClient
-
 from app.core import db
 from app.core.config import get_settings
 from app.core.errors import (
     DocumentConflict,
     IndexIdentityConflict,
+    InvalidDocument,
     ProviderError,
     SchemaMismatch,
 )
@@ -31,6 +27,10 @@ from app.main import app
 from app.services.embeddings import _local_embed
 from app.services.ingestion import process_document
 from app.services.retrieval import retrieve
+from fastapi.testclient import TestClient
+from psycopg import sql
+from psycopg_pool import ConnectionPool
+from support import configured, real_config
 
 
 @unittest.skipUnless(
@@ -56,7 +56,8 @@ class IntegrationTests(unittest.TestCase):
                 "SELECT 1 FROM pg_extension WHERE extname = 'vector'"
             ).fetchone():
                 raise RuntimeError(
-                    "Initialize pgvector using infra/db/init.sql before integration tests"
+                    "Initialize pgvector using infra/db/init.sql before "
+                    "integration tests"
                 )
             conn.execute(sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(cls.schema)))
         cls.addClassCleanup(cls.cleanup_schema)
@@ -93,6 +94,21 @@ class IntegrationTests(unittest.TestCase):
                 "TRUNCATE chunks, documents, embedding_index RESTART IDENTITY CASCADE"
             )
         self.client = TestClient(app)
+        self.queued_jobs = []
+
+        async def capture_job(document_id, filename, content):
+            self.queued_jobs.append((document_id, filename, content))
+            return f"ingest-{document_id}"
+
+        self.queue_patch = patch(
+            "app.routers.documents.enqueue_document", side_effect=capture_job
+        )
+        self.queue_patch.start()
+        self.addCleanup(self.queue_patch.stop)
+
+    def run_next_job(self):
+        self.assertTrue(self.queued_jobs, "upload did not enqueue a job")
+        return process_document(*self.queued_jobs.pop(0))
 
     def create_document(self, filename="test.txt"):
         with db.get_conn() as conn:
@@ -118,10 +134,12 @@ class IntegrationTests(unittest.TestCase):
         response = self.client.post(
             "/documents", files={"file": ("rag.txt", b"RAG uses retrieved documents.")}
         )
-        self.assertEqual(response.status_code, 201, response.text)
+        self.assertEqual(response.status_code, 202, response.text)
         document = response.json()
         self.assertEqual(document["mode"], "fixture")
-        self.assertEqual(document["chunk_count"], 1)
+        self.assertEqual(document["status"], "pending")
+        self.assertEqual(document["chunk_count"], 0)
+        self.assertEqual(self.run_next_job(), 1)
         self.assertEqual(self.client.get("/documents").json()[0]["status"], "ready")
         chat = self.client.post(
             "/chat", json={"question": "RAG uses retrieved documents."}
@@ -239,7 +257,8 @@ class IntegrationTests(unittest.TestCase):
         document_id = self.create_document()
         with db.get_conn() as conn:
             conn.execute(
-                "CREATE FUNCTION reject_second() RETURNS trigger LANGUAGE plpgsql AS $$ "
+                "CREATE FUNCTION reject_second() RETURNS trigger "
+                "LANGUAGE plpgsql AS $$ "
                 "BEGIN IF NEW.chunk_index = 1 THEN RAISE EXCEPTION 'secret'; END IF; "
                 "RETURN NEW; END $$"
             )
@@ -259,17 +278,20 @@ class IntegrationTests(unittest.TestCase):
         state = self.state(document_id)
         self.assertEqual((state[0], state[1], state[4]), ("failed", 0, 0))
 
-    def test_empty_extracted_text_is_failed_and_422(self):
+    def test_empty_extracted_text_is_accepted_then_failed_by_worker(self):
         response = self.client.post(
             "/documents", files={"file": ("empty.txt", b" \n ")}
         )
-        self.assertEqual(response.status_code, 422, response.text)
+        self.assertEqual(response.status_code, 202, response.text)
+        with self.assertRaises(InvalidDocument):
+            self.run_next_job()
         document = self.client.get("/documents").json()[0]
         self.assertEqual(document["status"], "failed")
         self.assertEqual(document["chunk_count"], 0)
 
     def test_index_identity_change_rejects_query_upload_and_readiness(self):
         self.client.post("/documents", files={"file": ("test.txt", b"content")})
+        self.run_next_job()
         with (
             configured(embedding_revision="2"),
             patch("app.services.retrieval.embed") as provider,
@@ -280,7 +302,9 @@ class IntegrationTests(unittest.TestCase):
             response = self.client.post(
                 "/documents", files={"file": ("new.txt", b"new content")}
             )
-            self.assertEqual(response.status_code, 409, response.text)
+            self.assertEqual(response.status_code, 202, response.text)
+            with self.assertRaises(IndexIdentityConflict):
+                self.run_next_job()
             self.assertEqual(self.client.get("/readyz").status_code, 503)
         with db.get_conn() as conn:
             self.assertEqual(
@@ -289,6 +313,7 @@ class IntegrationTests(unittest.TestCase):
 
     def test_same_dimension_real_provider_cannot_query_fixture_index(self):
         self.client.post("/documents", files={"file": ("test.txt", b"content")})
+        self.run_next_job()
         with real_config(), patch("app.services.retrieval.embed") as provider:
             with self.assertRaises(IndexIdentityConflict):
                 retrieve("question")
@@ -328,14 +353,15 @@ class IntegrationTests(unittest.TestCase):
             upload = self.client.post(
                 "/documents", files={"file": ("real.txt", b"content")}
             )
-            self.assertEqual(upload.status_code, 201, upload.text)
+            self.assertEqual(upload.status_code, 202, upload.text)
+            self.run_next_job()
             chat = self.client.post("/chat", json={"question": "question"})
             self.assertEqual(chat.status_code, 200, chat.text)
             self.assertEqual(chat.json()["mode"], "real")
             self.assertEqual(chat.json()["usage"]["input_tokens"], 12)
             self.assertEqual(chat.json()["usage"]["source"], "provider")
 
-    def test_provider_failure_is_502_and_metadata_truthful(self):
+    def test_provider_failure_is_recorded_by_worker_and_metadata_truthful(self):
         with (
             real_config(),
             patch("app.services.embeddings.post_json", side_effect=ProviderError()),
@@ -343,7 +369,9 @@ class IntegrationTests(unittest.TestCase):
             response = self.client.post(
                 "/documents", files={"file": ("real.txt", b"content")}
             )
-        self.assertEqual(response.status_code, 502, response.text)
+            self.assertEqual(response.status_code, 202, response.text)
+            with self.assertRaises(ProviderError):
+                self.run_next_job()
         document = self.client.get("/documents").json()[0]
         self.assertEqual(
             (document["status"], document["chunk_count"], document["error_code"]),

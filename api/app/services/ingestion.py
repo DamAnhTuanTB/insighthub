@@ -1,4 +1,4 @@
-"""Starter ingestion is synchronous. Day 1 students still implement the queue/worker."""
+"""Atomic, idempotent ingestion core executed by the ARQ worker."""
 
 import hashlib
 import io
@@ -70,11 +70,12 @@ def _pipeline_id() -> str:
 
 
 def process_document(document_id: int, filename: str, content: bytes) -> int:
-    """Same ID + bytes + pipeline is a no-op after success, including concurrent retries.
+    """Process one document atomically and idempotently.
 
-    A row lock spans the synchronous provider calls. A savepoint atomically replaces
-    chunks and metadata. Failures commit truthful status while still holding the lock,
-    so a delayed failure cannot overwrite a later successful retry.
+    Same ID + bytes + pipeline is a no-op after success, including concurrent
+    retries. A row lock spans the synchronous provider calls. A savepoint atomically
+    replaces chunks and metadata. Failures commit truthful status while still holding
+    the lock, so a delayed failure cannot overwrite a later successful retry.
     """
     settings = get_settings()
     digest, pipeline_id = hashlib.sha256(content).hexdigest(), _pipeline_id()
@@ -100,7 +101,8 @@ def process_document(document_id: int, filename: str, content: bytes) -> int:
                 ensure_index_identity(conn, claim=False)
                 return row[2]
             conn.execute(
-                "UPDATE documents SET content_sha256 = %s, pipeline_id = %s WHERE id = %s",
+                "UPDATE documents SET content_sha256 = %s, pipeline_id = %s "
+                "WHERE id = %s",
                 (digest, pipeline_id, document_id),
             )
             try:
@@ -129,7 +131,8 @@ def process_document(document_id: int, filename: str, content: bytes) -> int:
                     ):
                         conn.execute(
                             "INSERT INTO chunks "
-                            "(document_id, chunk_index, chunk_text, embedding, embedding_identity_id) "
+                            "(document_id, chunk_index, chunk_text, embedding, "
+                            "embedding_identity_id) "
                             "VALUES (%s, %s, %s, %s::vector, %s)",
                             (
                                 document_id,
@@ -141,7 +144,8 @@ def process_document(document_id: int, filename: str, content: bytes) -> int:
                         )
                     chunk_count = len(chunks)
                     conn.execute(
-                        "UPDATE documents SET status = 'ready', chunk_count = %s, error_code = NULL "
+                        "UPDATE documents SET status = 'ready', chunk_count = %s, "
+                        "error_code = NULL "
                         "WHERE id = %s",
                         (chunk_count, document_id),
                     )
@@ -162,8 +166,3 @@ def process_document(document_id: int, filename: str, content: bytes) -> int:
         )
         raise failure from None
     return chunk_count
-
-
-def ingest_document_sync(document_id: int, filename: str, content: bytes) -> int:
-    # Day 1: replace the caller with enqueueing, preserving process_document's contract.
-    return process_document(document_id, filename, content)

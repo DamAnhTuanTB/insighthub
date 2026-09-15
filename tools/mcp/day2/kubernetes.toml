@@ -1,0 +1,7 @@
+read_only = true
+toolsets = ["core"]
+
+[[denied_resources]]
+group = ""
+version = "v1"
+kind = "Secret"

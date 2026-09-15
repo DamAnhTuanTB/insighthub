@@ -1,0 +1,16 @@
+# Optional Day 2 lab overlay; preserves the five default Day 1 services.
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0@sha256:63805ebb8d2b3920190daf1cb14a60871b16fd38bed42b857a3182bc621f4996
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=1d
+      - --web.listen-address=0.0.0.0:9090
+    ports: ["127.0.0.1:9090:9090"]
+    volumes:
+      - ./tools/mcp/day2/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - day2-prometheus:/prometheus
+    mem_limit: 384m
+
+volumes:
+  day2-prometheus:

@@ -1,0 +1,37 @@
+# Generated from .mcp.json by tools/mcp/day2/host-config.mjs; edit the JSON source.
+# Portable form: launch the host from the repository root. Use --absolute for GUI hosts.
+
+[mcp_servers.filesystem]
+command = "node"
+args = ["tools/mcp/day2/launch.mjs","filesystem"]
+cwd = "."
+startup_timeout_sec = 30
+tool_timeout_sec = 15
+enabled_tools = ["list_directory","read_text_file"]
+
+[mcp_servers.docker]
+command = "node"
+args = ["tools/mcp/day2/launch.mjs","docker"]
+cwd = "."
+startup_timeout_sec = 30
+tool_timeout_sec = 15
+enabled_tools = ["docker_list_containers","docker_inspect_container","docker_worker_events"]
+
+[mcp_servers.docker.env]
+INSIGHTHUB_DOCKER_PROJECT = "insighthub-do2603"
+
+[mcp_servers.kubernetes]
+command = "node"
+args = ["tools/mcp/day2/launch.mjs","kubernetes"]
+cwd = "."
+startup_timeout_sec = 30
+tool_timeout_sec = 15
+enabled_tools = ["pods_list_in_namespace","pods_get","pods_log","events_list"]
+
+[mcp_servers.prometheus]
+command = "node"
+args = ["tools/mcp/day2/launch.mjs","prometheus"]
+cwd = "."
+startup_timeout_sec = 30
+tool_timeout_sec = 15
+enabled_tools = ["query"]

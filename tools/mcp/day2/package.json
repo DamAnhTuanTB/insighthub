@@ -1,0 +1,14 @@
+{
+  "name": "insighthub-day2-mcp-backends",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "dependencies": {
+    "@modelcontextprotocol/server-filesystem": "2026.8.31"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "2.6.0"
+  }
+}

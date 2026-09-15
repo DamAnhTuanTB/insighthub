@@ -1,0 +1,26 @@
+# Real local Kubernetes workload for MCP calls; this is NOT a Day 3 deployment.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: day2-lab-sample
+  namespace: insighthub
+  labels:
+    app.kubernetes.io/name: insighthub-day2-lab-sample
+    insighthub.workload: lab-sample
+spec:
+  automountServiceAccountToken: false
+  restartPolicy: Always
+  containers:
+    - name: sample
+      image: busybox:1.37.0@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0
+      command: ["sleep", "86400"]
+      resources:
+        requests: {cpu: "10m", memory: "8Mi"}
+        limits: {cpu: "100m", memory: "32Mi"}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: {drop: ["ALL"]}
+        seccompProfile: {type: RuntimeDefault}

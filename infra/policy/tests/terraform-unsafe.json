@@ -1,0 +1,36 @@
+{
+  "resource_changes": [
+    {
+      "address": "kubernetes_namespace_v1.unsafe",
+      "mode": "managed",
+      "type": "kubernetes_namespace_v1",
+      "change": {
+        "after": {
+          "metadata": [
+            {
+              "name": "default",
+              "labels": {}
+            }
+          ]
+        }
+      }
+    },
+    {
+      "address": "kubernetes_service_account_v1.unsafe",
+      "mode": "managed",
+      "type": "kubernetes_service_account_v1",
+      "change": {
+        "after": {
+          "automount_service_account_token": true,
+          "metadata": [
+            {
+              "name": "unsafe",
+              "namespace": "default",
+              "labels": {}
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

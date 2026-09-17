@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "day": 3,
+  "mode": "real",
+  "observed_at": "2026-09-17T08:45:58Z",
+  "source_sha256": "e58f800b3539c3603d6d4c7c89db3ac34baa00bbc8a2a6fb0f120031b840dce3",
+  "artifacts": {
+    "deployment": {
+      "path": "evidence/day3-local-deployment.yaml",
+      "sha256": "d35cd819650cff34ae4a36b05505f74ec07973ac11bea0fb05a26c4de615dd8b"
+    },
+    "ci_binding": {
+      "path": "evidence/day3-ci-binding.json",
+      "sha256": "1989fa4a2cd90b80e22b031eda3a2232a937dafef1acff8b7d4c3794aa2d57eb"
+    }
+  }
+}

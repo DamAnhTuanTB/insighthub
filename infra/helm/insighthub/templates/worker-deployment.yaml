@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "insighthub.fullname" . }}-worker
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+  annotations:
+    checkov.io/skip1: CKV_K8S_15=Local images are loaded into the cluster node and must not be pulled from a registry.
+    checkov.io/skip2: CKV_K8S_43=The local-only image has no registry digest; release profiles must replace it with a digest.
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "insighthub.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "insighthub.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: {{ include "insighthub.image" .Values.images.worker | quote }}
+          imagePullPolicy: {{ .Values.images.worker.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.runtime.configMapName }}
+          env:
+            - name: TMPDIR
+              value: /tmp
+          command: ["sh", "-ec"]
+          args:
+            - |
+              export DATABASE_URL="$(cat /run/insighthub-secrets/DATABASE_URL)"
+              export REDIS_URL="$(cat /run/insighthub-secrets/REDIS_URL)"
+              until python -c 'import os, socket; from urllib.parse import urlparse; target = urlparse(os.environ["REDIS_URL"]); socket.create_connection((target.hostname, target.port or 6379), timeout=1).close()'; do
+                sleep 1
+              done
+              exec arq --custom-log-dict worker.LOGGING_CONFIG worker.WorkerSettings
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -ec
+                - export REDIS_URL="$(cat /run/insighthub-secrets/REDIS_URL)"; exec arq --check worker.WorkerSettings
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -ec
+                - export REDIS_URL="$(cat /run/insighthub-secrets/REDIS_URL)"; exec arq --check worker.WorkerSettings
+            initialDelaySeconds: 8
+            periodSeconds: 8
+            timeoutSeconds: 5
+            failureThreshold: 6
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: runtime-secrets
+              mountPath: /run/insighthub-secrets
+              readOnly: true
+      terminationGracePeriodSeconds: 40
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: runtime-secrets
+          secret:
+            secretName: {{ .Values.runtime.existingSecret }}
+            defaultMode: 0440
+            items:
+              - key: DATABASE_URL
+                path: DATABASE_URL
+              - key: REDIS_URL
+                path: REDIS_URL

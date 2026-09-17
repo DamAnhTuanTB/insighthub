@@ -1,0 +1,9 @@
+InsightHub local profile is installed in namespace {{ .Release.Namespace }}.
+
+Port-forward API:
+  kubectl -n {{ .Release.Namespace }} port-forward service/{{ include "insighthub.fullname" . }}-api 8000:{{ .Values.api.service.port }}
+
+Port-forward web:
+  kubectl -n {{ .Release.Namespace }} port-forward service/{{ include "insighthub.fullname" . }}-web 3000:{{ .Values.web.service.port }}
+
+This release is local-only. It does not verify AWS services, OIDC, IRSA, or cost.

@@ -24,8 +24,11 @@ yarn-error.log*
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfplan
+tfplan*.json
 *.tfvars
 !*.tfvars.example
+infra/state/
 
 # --- IDE / OS ---
 .vscode/
@@ -42,5 +45,11 @@ tmp/
 
 # Local evidence and release outputs
 evidence/
+!evidence/
+evidence/*
+!evidence/day3.json
+!evidence/day3-*.json
+!evidence/day3-*.md
+!evidence/day3-*.yaml
 reports/
 *.tsbuildinfo

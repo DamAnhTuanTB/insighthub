@@ -1,0 +1,48 @@
+{
+  "resource_changes": [
+    {
+      "address": "module.namespace.kubernetes_namespace_v1.this",
+      "mode": "managed",
+      "type": "kubernetes_namespace_v1",
+      "change": {
+        "after": {
+          "metadata": [
+            {
+              "name": "insighthub-dev",
+              "labels": {
+                "app.kubernetes.io/name": "insighthub",
+                "app.kubernetes.io/managed-by": "terraform",
+                "insighthub.dev/environment": "dev",
+                "insighthub.dev/owner": "student",
+                "insighthub.dev/cost-center": "learning"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "address": "module.namespace.kubernetes_service_account_v1.application",
+      "mode": "managed",
+      "type": "kubernetes_service_account_v1",
+      "change": {
+        "after": {
+          "automount_service_account_token": false,
+          "metadata": [
+            {
+              "name": "insighthub",
+              "namespace": "insighthub-dev",
+              "labels": {
+                "app.kubernetes.io/name": "insighthub",
+                "app.kubernetes.io/managed-by": "terraform",
+                "insighthub.dev/environment": "dev",
+                "insighthub.dev/owner": "student",
+                "insighthub.dev/cost-center": "learning"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

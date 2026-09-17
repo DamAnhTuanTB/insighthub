@@ -1,0 +1,875 @@
+---
+# Source: insighthub/templates/network-policies.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: insighthub-web
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: web
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: web
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: insighthub
+              app.kubernetes.io/instance: insighthub
+              app.kubernetes.io/component: api
+      ports:
+        - protocol: TCP
+          port: 8000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Source: insighthub/templates/network-policies.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: insighthub-api
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: api
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: api
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: insighthub
+              app.kubernetes.io/instance: insighthub
+              app.kubernetes.io/component: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: insighthub
+              app.kubernetes.io/instance: insighthub
+              app.kubernetes.io/component: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Source: insighthub/templates/network-policies.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: insighthub-worker
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: worker
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: worker
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: insighthub
+              app.kubernetes.io/instance: insighthub
+              app.kubernetes.io/component: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: insighthub
+              app.kubernetes.io/instance: insighthub
+              app.kubernetes.io/component: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Source: insighthub/templates/network-policies.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: insighthub-postgres
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: postgres
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values: [api, worker]
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress: []
+
+---
+# Source: insighthub/templates/network-policies.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: insighthub-redis
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: redis
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: redis
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values: [api, worker]
+      ports:
+        - protocol: TCP
+          port: 6379
+  egress: []
+
+---
+# Source: insighthub/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: settings
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+data:
+  ENVIRONMENT: "local"
+  LOG_LEVEL: "INFO"
+  RAG_MODE: "fixture"
+  LLM_PROVIDER: "fixture"
+  EMBEDDING_PROVIDER: "fixture"
+  EMBEDDING_DIM: "1024"
+  EMBEDDING_REVISION: "1"
+  LLM_MAX_TOKENS: "1024"
+  PROVIDER_TIMEOUT_SECONDS: "60"
+
+---
+# Source: insighthub/templates/api-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: insighthub-api
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP
+
+---
+# Source: insighthub/templates/postgres.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: insighthub-postgres
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: postgres
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/component: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+
+---
+# Source: insighthub/templates/redis.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: insighthub-redis
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: redis
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/component: redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+
+---
+# Source: insighthub/templates/web-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: insighthub-web
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: web
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/component: web
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
+
+---
+# Source: insighthub/templates/api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insighthub-api
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: api
+  annotations:
+    checkov.io/skip1: CKV_K8S_15=Local images are loaded into the cluster node and must not be pulled from a registry.
+    checkov.io/skip2: CKV_K8S_43=The local-only image has no registry digest; release profiles must replace it with a digest.
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: insighthub
+        app.kubernetes.io/instance: insighthub
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: insighthub
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: "insighthub-api:local"
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: settings
+          env:
+            - name: TMPDIR
+              value: /tmp
+          command: ["sh", "-ec"]
+          args:
+            - |
+              export DATABASE_URL="$(cat /run/insighthub-secrets/DATABASE_URL)"
+              export REDIS_URL="$(cat /run/insighthub-secrets/REDIS_URL)"
+              exec uvicorn app.main:app --host 0.0.0.0 --port 8000
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 12
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: runtime-secrets
+              mountPath: /run/insighthub-secrets
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: runtime-secrets
+          secret:
+            secretName: runtime
+            defaultMode: 0440
+            items:
+              - key: DATABASE_URL
+                path: DATABASE_URL
+              - key: REDIS_URL
+                path: REDIS_URL
+
+---
+# Source: insighthub/templates/web-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insighthub-web
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: web
+  annotations:
+    checkov.io/skip1: CKV_K8S_15=Local images are loaded into the cluster node and must not be pulled from a registry.
+    checkov.io/skip2: CKV_K8S_43=The local-only image has no registry digest; release profiles must replace it with a digest.
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: insighthub
+        app.kubernetes.io/instance: insighthub
+        app.kubernetes.io/component: web
+    spec:
+      serviceAccountName: insighthub
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: web
+          image: "insighthub-web:local"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: API_INTERNAL_URL
+              value: http://insighthub-api:8000
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 6
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          volumeMounts:
+            - name: next-cache
+              mountPath: /app/.next/cache
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: next-cache
+          emptyDir:
+            sizeLimit: 128Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+
+---
+# Source: insighthub/templates/worker-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insighthub-worker
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: worker
+  annotations:
+    checkov.io/skip1: CKV_K8S_15=Local images are loaded into the cluster node and must not be pulled from a registry.
+    checkov.io/skip2: CKV_K8S_43=The local-only image has no registry digest; release profiles must replace it with a digest.
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: insighthub
+        app.kubernetes.io/instance: insighthub
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: insighthub
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: "insighthub-worker:local"
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: settings
+          env:
+            - name: TMPDIR
+              value: /tmp
+          command: ["sh", "-ec"]
+          args:
+            - |
+              export DATABASE_URL="$(cat /run/insighthub-secrets/DATABASE_URL)"
+              export REDIS_URL="$(cat /run/insighthub-secrets/REDIS_URL)"
+              until python -c 'import os, socket; from urllib.parse import urlparse; target = urlparse(os.environ["REDIS_URL"]); socket.create_connection((target.hostname, target.port or 6379), timeout=1).close()'; do
+                sleep 1
+              done
+              exec arq --custom-log-dict worker.LOGGING_CONFIG worker.WorkerSettings
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -ec
+                - export REDIS_URL="$(cat /run/insighthub-secrets/REDIS_URL)"; exec arq --check worker.WorkerSettings
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -ec
+                - export REDIS_URL="$(cat /run/insighthub-secrets/REDIS_URL)"; exec arq --check worker.WorkerSettings
+            initialDelaySeconds: 8
+            periodSeconds: 8
+            timeoutSeconds: 5
+            failureThreshold: 6
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: runtime-secrets
+              mountPath: /run/insighthub-secrets
+              readOnly: true
+      terminationGracePeriodSeconds: 40
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: runtime-secrets
+          secret:
+            secretName: runtime
+            defaultMode: 0440
+            items:
+              - key: DATABASE_URL
+                path: DATABASE_URL
+              - key: REDIS_URL
+                path: REDIS_URL
+
+---
+# Source: insighthub/templates/postgres.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: insighthub-postgres
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: postgres
+  annotations:
+    checkov.io/skip1: CKV_K8S_40=The pinned official pgvector image uses the postgres UID 999; the pod remains non-root and drops all capabilities.
+spec:
+  serviceName: insighthub-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: insighthub
+        app.kubernetes.io/instance: insighthub
+        app.kubernetes.io/component: postgres
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: "pgvector/pgvector:0.8.2-pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_DB
+              value: "insighthub"
+            - name: POSTGRES_USER
+              value: "insighthub"
+            - name: POSTGRES_PASSWORD_FILE
+              value: /run/insighthub-secrets/POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "insighthub", "-d", "insighthub"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "insighthub", "-d", "insighthub"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 12
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            limits:
+              cpu: 750m
+              memory: 768Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: run
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+            - name: db-init
+              mountPath: /docker-entrypoint-initdb.d/init.sql
+              subPath: init.sql
+              readOnly: true
+            - name: runtime-secrets
+              mountPath: /run/insighthub-secrets
+              readOnly: true
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: run
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: db-init
+          configMap:
+            name: db-init
+        - name: runtime-secrets
+          secret:
+            secretName: runtime
+            defaultMode: 0440
+            items:
+              - key: POSTGRES_PASSWORD
+                path: POSTGRES_PASSWORD
+
+---
+# Source: insighthub/templates/redis.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: insighthub-redis
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/instance: insighthub
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    insighthub.dev/environment: "local"
+    app.kubernetes.io/component: redis
+  annotations:
+    checkov.io/skip1: CKV_K8S_40=The pinned official Redis image uses UID 999; the pod remains non-root and drops all capabilities.
+spec:
+  serviceName: insighthub-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/instance: insighthub
+      app.kubernetes.io/component: redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: insighthub
+        app.kubernetes.io/instance: insighthub
+        app.kubernetes.io/component: redis
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: redis
+          image: "redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf"
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - |
+              umask 077
+              REDIS_PASSWORD=$(cat /run/insighthub-secrets/REDIS_PASSWORD)
+              printf 'appendonly yes\nmaxmemory 128mb\nmaxmemory-policy noeviction\nrequirepass %s\n' "$REDIS_PASSWORD" > /tmp/redis.conf
+              exec redis-server /tmp/redis.conf
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command: ["sh", "-ec", "REDISCLI_AUTH=$(cat /run/insighthub-secrets/REDIS_PASSWORD) redis-cli ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          readinessProbe:
+            exec:
+              command: ["sh", "-ec", "REDISCLI_AUTH=$(cat /run/insighthub-secrets/REDIS_PASSWORD) redis-cli ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 12
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            limits:
+              cpu: 300m
+              memory: 192Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+            - name: runtime-secrets
+              mountPath: /run/insighthub-secrets
+              readOnly: true
+      volumes:
+        - name: data
+          emptyDir:
+            sizeLimit: 256Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: runtime-secrets
+          secret:
+            secretName: runtime
+            defaultMode: 0440
+            items:
+              - key: REDIS_PASSWORD
+                path: REDIS_PASSWORD

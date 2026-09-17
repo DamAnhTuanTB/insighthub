@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.runtime.configMapName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" . | nindent 4 }}
+data:
+  ENVIRONMENT: {{ .Values.config.environment | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  RAG_MODE: {{ .Values.config.ragMode | quote }}
+  LLM_PROVIDER: {{ .Values.config.llmProvider | quote }}
+  EMBEDDING_PROVIDER: {{ .Values.config.embeddingProvider | quote }}
+  EMBEDDING_DIM: {{ .Values.config.embeddingDimension | quote }}
+  EMBEDDING_REVISION: {{ .Values.config.embeddingRevision | quote }}
+  LLM_MAX_TOKENS: {{ .Values.config.llmMaxTokens | quote }}
+  PROVIDER_TIMEOUT_SECONDS: {{ .Values.config.providerTimeoutSeconds | quote }}

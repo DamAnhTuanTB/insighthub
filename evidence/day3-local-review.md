@@ -1,12 +1,12 @@
 # Day 3 local implementation review
 
-Observed at: 2026-09-17T08:45:58Z
+Observed at: 2026-09-17T08:48:49Z
 
 ## Scope and provenance
 
 - Deployment profile: local Kubernetes on kind context `kind-insighthub-day2`.
 - Kubernetes server: `v1.35.8`.
-- Source digest: `e58f800b3539c3603d6d4c7c89db3ac34baa00bbc8a2a6fb0f120031b840dce3`.
+- Source digest: `8859f426bea97d7785d7dfc807631073200e62a7ee3fcc6b76d3f0f3549ad397`.
 - Rendered deployment digest: `d35cd819650cff34ae4a36b05505f74ec07973ac11bea0fb05a26c4de615dd8b`.
 - AWS verified: **false**. This work does not claim EKS, RDS, ElastiCache,
   IRSA, Secrets Manager, S3 remote state, AWS OIDC, Infracost, or AWS billing.

@@ -1,0 +1,138 @@
+{
+  "incident_id": "incident-1",
+  "started_at": "2026-09-22T14:44:36Z",
+  "ended_at": "2026-09-22T15:05:48Z",
+  "failure_start": "2026-09-22T14:49:42Z",
+  "failure_end": "2026-09-22T14:59:42Z",
+  "title": "LLM generation latency breached its anomaly band",
+  "summary": "LLM call p95 rose from a flat 0.2375s baseline to 9.75s for roughly ten minutes. Requests kept being served throughout, so this was a slowdown in the generation path rather than an outage, and no other signal moved.",
+  "hypotheses": [
+    "The generation step itself slowed down. insighthub:llm_latency_p95:5m went from 0.2375 to 9.75 while insighthub_llm_call_latency_seconds_count kept climbing (1 to 20 to 36 within the window), so requests were completing, just slowly. A failing provider would have raised the error ratio instead.",
+    "Not CPU exhaustion. Container CPU for the api pod stayed near 0.004 cores against a 1 core limit for the whole window, so the pod was never throttled and had capacity to spare.",
+    "Not contention with ingestion. Queue depth stayed at 0 and the 5xx ratio stayed at 0 across the same eleven minutes, so no background ingestion was competing for the database or the event loop.",
+    "The delay sits inside generation, not retrieval. insighthub:rag_latency_p95:5m tracked the LLM p95 exactly at 9.75s; RAG latency wraps the LLM call, so retrieval contributed nothing measurable and the added time is entirely in the generation step.",
+    "The anomaly band itself behaved correctly. The band read 0.2375 while the incident was live and only widened to 11.0974 afterwards, which is what the ten minute baseline offset is for: the band did not absorb the failure it was measuring."
+  ],
+  "root_cause": "A deliberate 6000ms delay was injected into the fixture generation path via CHAOS_LLM_EXTRA_LATENCY_MS, applied by scripts/chaos/inject-llm-latency.sh. The metric window matches the injection window, and the configured delay accounts for the observed shift in p95.",
+  "confidence": 0.95,
+  "correlation": [
+    "LLM p95 and RAG p95 moved together and by the same amount, isolating the change to the generation step.",
+    "Request count, error ratio and queue depth were all unchanged, which rules out load, failure and contention.",
+    "CPU stayed flat, which rules out resource pressure as either cause or consequence."
+  ],
+  "remediation": [
+    "Remove the injected delay by clearing CHAOS_ENABLED and CHAOS_LLM_EXTRA_LATENCY_MS on the api deployment.",
+    "For a real provider slowdown, PROVIDER_TIMEOUT_SECONDS bounds how long a single call may block before it becomes an error instead of latency.",
+    "Consider a separate alert on generation latency versus retrieval latency so the two can be distinguished without reading both panels."
+  ],
+  "detection": {
+    "alert": "LLMLatencyAnomaly",
+    "fired": true,
+    "condition": "p95 above mean+3*stddev of the offset one hour baseline, and above a 0.5s floor, sustained for 2m",
+    "delivered_to": "Slack #alerts"
+  },
+  "evidence_source": {
+    "prometheus_url": "http://127.0.0.1:9090",
+    "collected_at": "2026-09-22T15:40:32Z",
+    "collector": "scripts/day4/collect-samples.py",
+    "note": "Every value below was read from Prometheus, not authored by a model."
+  },
+  "samples": [
+    {
+      "metric": "insighthub:llm_latency_p95:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T14:44:36Z",
+      "value": 0.2375
+    },
+    {
+      "metric": "insighthub:llm_latency_p95:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T14:55:06Z",
+      "value": 9.75
+    },
+    {
+      "metric": "insighthub:llm_latency_p95:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T15:05:36Z",
+      "value": 0.2375
+    },
+    {
+      "metric": "insighthub:llm_latency_p95:anomaly_upper",
+      "labels": {},
+      "timestamp": "2026-09-22T14:44:36Z",
+      "value": 0.23750000000000002
+    },
+    {
+      "metric": "insighthub:llm_latency_p95:anomaly_upper",
+      "labels": {},
+      "timestamp": "2026-09-22T14:55:06Z",
+      "value": 0.23750000000000002
+    },
+    {
+      "metric": "insighthub:llm_latency_p95:anomaly_upper",
+      "labels": {},
+      "timestamp": "2026-09-22T15:05:36Z",
+      "value": 11.097449506826694
+    },
+    {
+      "metric": "insighthub:rag_latency_p95:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T14:44:36Z",
+      "value": 0.095
+    },
+    {
+      "metric": "insighthub:rag_latency_p95:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T14:55:06Z",
+      "value": 9.75
+    },
+    {
+      "metric": "insighthub:rag_latency_p95:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T15:05:36Z",
+      "value": 0.095
+    },
+    {
+      "metric": "insighthub_llm_call_latency_seconds_count",
+      "labels": {
+        "container": "api",
+        "endpoint": "http",
+        "instance": "10.244.0.39:8000",
+        "job": "insighthub-api",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-api-558c4c9cb8-765b8",
+        "service": "insighthub-api"
+      },
+      "timestamp": "2026-09-22T14:50:06Z",
+      "value": 1.0
+    },
+    {
+      "metric": "insighthub_llm_call_latency_seconds_count",
+      "labels": {
+        "container": "api",
+        "endpoint": "http",
+        "instance": "10.244.0.39:8000",
+        "job": "insighthub-api",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-api-558c4c9cb8-765b8",
+        "service": "insighthub-api"
+      },
+      "timestamp": "2026-09-22T14:55:06Z",
+      "value": 20.0
+    },
+    {
+      "metric": "insighthub_llm_call_latency_seconds_count",
+      "labels": {
+        "container": "api",
+        "endpoint": "http",
+        "instance": "10.244.0.39:8000",
+        "job": "insighthub-api",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-api-558c4c9cb8-765b8",
+        "service": "insighthub-api"
+      },
+      "timestamp": "2026-09-22T14:59:36Z",
+      "value": 36.0
+    }
+  ]
+}

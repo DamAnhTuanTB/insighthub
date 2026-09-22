@@ -1,0 +1,72 @@
+{
+  "observed_at": "2026-09-22T16:18:38Z",
+  "subject": "system:serviceaccount:insighthub:mcp-readonly",
+  "note": "Day 4 extends the Day 2 read-only ServiceAccount to the application namespace with a second namespace-scoped RoleBinding. No new verbs, no cluster-wide read, Secrets still denied.",
+  "checks": [
+    {
+      "verb": "list",
+      "resource": "pods",
+      "namespace": "insighthub-dev",
+      "allowed": true,
+      "expected": true,
+      "matches_expectation": true
+    },
+    {
+      "verb": "get",
+      "resource": "pods/log",
+      "namespace": "insighthub-dev",
+      "allowed": true,
+      "expected": true,
+      "matches_expectation": true
+    },
+    {
+      "verb": "list",
+      "resource": "services",
+      "namespace": "insighthub-dev",
+      "allowed": true,
+      "expected": true,
+      "matches_expectation": true
+    },
+    {
+      "verb": "list",
+      "resource": "secrets",
+      "namespace": "insighthub-dev",
+      "allowed": false,
+      "expected": false,
+      "matches_expectation": true
+    },
+    {
+      "verb": "delete",
+      "resource": "pods",
+      "namespace": "insighthub-dev",
+      "allowed": false,
+      "expected": false,
+      "matches_expectation": true
+    },
+    {
+      "verb": "create",
+      "resource": "pods",
+      "namespace": "insighthub-dev",
+      "allowed": false,
+      "expected": false,
+      "matches_expectation": true
+    },
+    {
+      "verb": "list",
+      "resource": "pods",
+      "namespace": "monitoring",
+      "allowed": false,
+      "expected": false,
+      "matches_expectation": true
+    },
+    {
+      "verb": "list",
+      "resource": "secrets",
+      "namespace": "monitoring",
+      "allowed": false,
+      "expected": false,
+      "matches_expectation": true
+    }
+  ],
+  "all_as_expected": true
+}

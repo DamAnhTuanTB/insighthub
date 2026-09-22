@@ -49,6 +49,12 @@ spec:
                 sleep 1
               done
               exec arq --custom-log-dict worker.LOGGING_CONFIG worker.WorkerSettings
+          {{- if .Values.observability.enabled }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.observability.worker.metricsPort }}
+              protocol: TCP
+          {{- end }}
           livenessProbe:
             exec:
               command:

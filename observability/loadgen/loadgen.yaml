@@ -1,0 +1,63 @@
+# Baseline workload for Day 4. Applied directly with kubectl: it is lab
+# tooling, not part of the deployed InsightHub release.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insighthub-loadgen
+  namespace: insighthub-dev
+  labels:
+    app.kubernetes.io/name: insighthub
+    app.kubernetes.io/component: loadgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+      app.kubernetes.io/component: loadgen
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: insighthub
+        app.kubernetes.io/component: loadgen
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: loadgen
+          image: insighthub-api:local
+          imagePullPolicy: IfNotPresent
+          command: ["python", "/opt/loadgen/loadgen.py"]
+          env:
+            - name: INSIGHTHUB_API_URL
+              value: http://insighthub-api:8000
+            - name: LOADGEN_CHAT_INTERVAL
+              value: "10"
+            - name: LOADGEN_UPLOAD_INTERVAL
+              value: "300"
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 48Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: script
+              mountPath: /opt/loadgen
+              readOnly: true
+      volumes:
+        - name: script
+          configMap:
+            name: insighthub-loadgen

@@ -1,0 +1,12 @@
+# Day 4 overlay. Applied on top of values-local.yaml so the Day 3 profile keeps
+# rendering unchanged when observability is not requested.
+observability:
+  enabled: true
+  monitoringNamespace: monitoring
+  serviceMonitor:
+    enabled: true
+    releaseLabel: kube-prom-stack
+    interval: 30s
+    scrapeTimeout: 10s
+  exporters:
+    enabled: true

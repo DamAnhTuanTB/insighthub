@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "day": 4,
+  "mode": "real",
+  "observed_at": "2026-09-22T16:20:20Z",
+  "source_sha256": "75814859497e78805dff1e187a802e49ab57e2c48076e7d7ef601d825c42716c",
+  "artifacts": {
+    "dashboard": {
+      "path": "observability/grafana/insighthub-overview.json",
+      "sha256": "a60adfb4a6cd3ccd3c71f342c3f692e5ee88799538dfd4530f0d0859a4698b35"
+    },
+    "mlops_notes": {
+      "path": "observability/mlops-overview-notes.md",
+      "sha256": "c68e362d76c8a3519b610fb7ab35acf17243f703d0ef835f8a0d80b41de14005"
+    },
+    "rules": {
+      "path": "observability/rules/day4-rules.yaml",
+      "sha256": "ba5a998ce4cbe50f4510f644d2a156c4af7c9a2adf792af211c17dcf0c8a429d"
+    },
+    "rule_tests": {
+      "path": "observability/rules/day4-rules_test.yaml",
+      "sha256": "367f30ce7354903a71fb4de205bb39a9e8b6432f6dc901d566b5fbe15a845367"
+    },
+    "rca": {
+      "path": "evidence/day4-incident-1.json",
+      "sha256": "49b2c4d788bbee4f247f5bf9846a6ac4ce1defa9f8415a84a7d4f644f96996a2"
+    },
+    "rca_2": {
+      "path": "evidence/day4-incident-2.json",
+      "sha256": "d867babe06558ead168c0953d9a878ce102cc6449658d85eaf2729db1f644f8a"
+    },
+    "rca_3": {
+      "path": "evidence/day4-incident-3.json",
+      "sha256": "0fa131d095bb255f3be3d0e55cff735f3a4813f485a7090457f31b52c57e7cf2"
+    }
+  }
+}

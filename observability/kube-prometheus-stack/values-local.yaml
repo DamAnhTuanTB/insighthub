@@ -1,0 +1,155 @@
+# Day 4 monitoring stack for the local kind cluster.
+# This is not Grafana Cloud, Amazon Managed Prometheus, or any AWS service.
+# Memory limits are deliberate: the lab shares an 8 GiB Docker VM.
+
+fullnameOverride: kube-prom-stack
+
+# The lab ships its own recording/alerting rules; upstream defaults would only
+# add noise and memory pressure on a single-node cluster.
+defaultRules:
+  create: false
+
+# kind does not expose these control-plane endpoints on predictable addresses.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false
+
+# Required for container CPU/memory panels (cAdvisor lives behind the kubelet).
+kubelet:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+nodeExporter:
+  enabled: true
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 24Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 192Mi
+
+prometheus:
+  prometheusSpec:
+    # Day 4 non-functional requirement: 15 day retention.
+    retention: 15d
+    retentionSize: 2GB
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+    # Pick up ServiceMonitors/Probes/Rules from any namespace that carries the
+    # release label, not only those Helm installed with this chart.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 300Mi
+      limits:
+        cpu: "1"
+        memory: 900Mi
+    # Survives pod restarts so incident telemetry stays queryable for evidence.
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+alertmanager:
+  alertmanagerSpec:
+    # Webhook URL is mounted from a Secret created at deploy time, never in Git.
+    secrets:
+      - alertmanager-slack
+    resources:
+      requests:
+        cpu: 10m
+        memory: 48Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+  config:
+    global:
+      resolve_timeout: 5m
+      slack_api_url_file: /etc/alertmanager/secrets/alertmanager-slack/webhook-url
+    route:
+      group_by: ["alertname", "severity"]
+      group_wait: 30s
+      group_interval: 2m
+      # Long enough that a firing incident is not re-announced during a lab run.
+      repeat_interval: 4h
+      receiver: slack-alerts
+      routes:
+        - receiver: slack-alerts
+          matchers:
+            - severity =~ "warning|critical"
+    receivers:
+      - name: slack-alerts
+        slack_configs:
+          - channel: "#alerts"
+            send_resolved: true
+            title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+            text: |-
+              {{ range .Alerts }}*{{ .Labels.severity }}* — {{ .Annotations.summary }}
+              value: `{{ .Annotations.value }}`
+              runbook: {{ .Annotations.runbook_url }}
+              started: {{ .StartsAt }}
+              {{ end }}
+
+grafana:
+  enabled: true
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  defaultDashboardsEnabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 96Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+  persistence:
+    enabled: false

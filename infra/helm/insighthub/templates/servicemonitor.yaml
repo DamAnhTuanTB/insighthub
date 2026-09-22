@@ -1,0 +1,63 @@
+{{- if and .Values.observability.enabled .Values.observability.serviceMonitor.enabled }}
+{{- $top := . }}
+{{- $fullname := include "insighthub.fullname" . }}
+{{- $sm := .Values.observability.serviceMonitor }}
+{{- $exporters := .Values.observability.exporters }}
+{{- $monitors := dict "api" (dict "port" "http") "worker" (dict "port" "metrics") }}
+{{- if $exporters.enabled }}
+{{- $_ := set $monitors "postgres-exporter" (dict "port" "metrics") }}
+{{- $_ := set $monitors "redis-exporter" (dict "port" "metrics") }}
+{{- end }}
+{{- range $component, $spec := $monitors }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $fullname }}-{{ $component }}
+  namespace: {{ $top.Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" $top | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+    # The stack only selects ServiceMonitors carrying its release label.
+    release: {{ $sm.releaseLabel }}
+spec:
+  namespaceSelector:
+    matchNames: [{{ $top.Values.namespace }}]
+  selector:
+    matchLabels:
+      {{- include "insighthub.selectorLabels" $top | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  endpoints:
+    - port: {{ $spec.port }}
+      path: /metrics
+      scheme: http
+      interval: {{ $sm.interval }}
+      scrapeTimeout: {{ $sm.scrapeTimeout }}
+      honorLabels: false
+---
+{{- end }}
+{{- if $exporters.enabled }}
+# Next.js serves no metrics endpoint; web availability is probed from outside.
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: {{ $fullname }}-web
+  namespace: {{ $top.Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" $top | nindent 4 }}
+    app.kubernetes.io/component: web
+    release: {{ $sm.releaseLabel }}
+spec:
+  interval: {{ $sm.interval }}
+  scrapeTimeout: {{ $sm.scrapeTimeout }}
+  module: http_2xx
+  prober:
+    url: {{ printf "%s-blackbox-exporter.%s.svc:%v" $fullname $top.Values.namespace $exporters.blackbox.port }}
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - {{ printf "http://%s-web.%s.svc:%v/" $fullname $top.Values.namespace (int $top.Values.web.service.port) | quote }}
+      labels:
+        app_kubernetes_io_component: web
+{{- end }}
+{{- end }}

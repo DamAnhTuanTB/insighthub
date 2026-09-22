@@ -51,5 +51,8 @@ evidence/*
 !evidence/day3-*.json
 !evidence/day3-*.md
 !evidence/day3-*.yaml
+!evidence/day4.json
+!evidence/day4-*.json
+!evidence/day4-*.md
 reports/
 *.tsbuildinfo

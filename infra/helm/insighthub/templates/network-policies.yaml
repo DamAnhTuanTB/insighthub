@@ -94,7 +94,18 @@ spec:
       {{- include "insighthub.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: worker
   policyTypes: [Ingress, Egress]
-  ingress: []
+  ingress:
+{{- if .Values.observability.enabled }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.observability.monitoringNamespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.observability.worker.metricsPort }}
+{{- else }}
+    []
+{{- end }}
   egress:
     - to:
         - podSelector:
@@ -143,7 +154,7 @@ spec:
             matchExpressions:
               - key: app.kubernetes.io/component
                 operator: In
-                values: [api, worker]
+                values: [api, worker{{ if .Values.observability.exporters.enabled }}, postgres-exporter{{ end }}]
       ports:
         - protocol: TCP
           port: 5432
@@ -169,9 +180,57 @@ spec:
             matchExpressions:
               - key: app.kubernetes.io/component
                 operator: In
-                values: [api, worker]
+                values: [api, worker{{ if .Values.observability.exporters.enabled }}, redis-exporter{{ end }}]
       ports:
         - protocol: TCP
           port: 6379
   egress: []
+{{- end }}
+{{- if and .Values.observability.enabled .Values.observability.exporters.enabled }}
+{{- $top := . }}
+{{- $exporters := .Values.observability.exporters }}
+{{- $targets := dict "postgres-exporter" (dict "port" $exporters.postgres.port "component" "postgres" "backendPort" 5432) "redis-exporter" (dict "port" $exporters.redis.port "component" "redis" "backendPort" 6379) "blackbox-exporter" (dict "port" $exporters.blackbox.port "component" "web" "backendPort" 3000) }}
+{{- range $name, $spec := $targets }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "insighthub.fullname" $top }}-{{ $name }}
+  namespace: {{ $top.Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" $top | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "insighthub.selectorLabels" $top | nindent 6 }}
+      app.kubernetes.io/component: {{ $name }}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $top.Values.observability.monitoringNamespace }}
+      ports:
+        - protocol: TCP
+          port: {{ $spec.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "insighthub.selectorLabels" $top | nindent 14 }}
+              app.kubernetes.io/component: {{ $spec.component }}
+      ports:
+        - protocol: TCP
+          port: {{ $spec.backendPort }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+{{- end }}
 {{- end }}

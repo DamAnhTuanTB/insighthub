@@ -63,11 +63,19 @@ class Settings(BaseSettings):
     retrieval_top_k: int = Field(default=5, ge=1, le=20)
     hnsw_ef_search: int = Field(default=100, ge=20, le=1000)
     max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1, le=50 * 1024 * 1024)
+    worker_metrics_port: int = Field(default=9101, ge=1024, le=65535)
+    worker_queue_poll_seconds: float = Field(default=5, gt=0, le=60)
+    # Day 4 fault injection. Deliberate slowdowns stay inside labeled fixture runs.
+    chaos_enabled: bool = False
+    chaos_llm_extra_latency_ms: int = Field(default=0, ge=0, le=60000)
+    chaos_chat_error_ratio: float = Field(default=0, ge=0, le=1, allow_inf_nan=False)
 
     @model_validator(mode="after")
     def validate_configuration(self):
         if self.chunk_overlap >= self.chunk_size:
             raise ValueError("CHUNK_OVERLAP must be smaller than CHUNK_SIZE")
+        if self.chaos_enabled and self.rag_mode != "fixture":
+            raise ValueError("CHAOS_ENABLED requires RAG_MODE=fixture")
         if self.rag_mode == "fixture":
             if self.llm_provider != "fixture" or self.embedding_provider != "fixture":
                 raise ValueError("RAG_MODE=fixture requires both providers=fixture")

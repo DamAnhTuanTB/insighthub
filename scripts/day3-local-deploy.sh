@@ -87,11 +87,20 @@ kubectl --kubeconfig "$KUBECONFIG_PATH" --context "$KUBE_CONTEXT" -n "$NAMESPACE
     --from-file=init.sql="$REPO_ROOT/infra/db/init.sql" --dry-run=client -o yaml \
     | kubectl --kubeconfig "$KUBECONFIG_PATH" --context "$KUBE_CONTEXT" -n "$NAMESPACE" apply -f -
 
+# Day 4 layers its observability overlay on top of the Day 3 local profile.
+EXTRA_VALUES_ARGS=""
+if [ -n "${HELM_EXTRA_VALUES:-}" ]; then
+    [ -f "$HELM_EXTRA_VALUES" ] || { printf 'Values file not found: %s\n' "$HELM_EXTRA_VALUES" >&2; exit 2; }
+    EXTRA_VALUES_ARGS="--values $HELM_EXTRA_VALUES"
+fi
+
+# shellcheck disable=SC2086
 helm upgrade --install "$RELEASE" "$REPO_ROOT/infra/helm/insighthub" \
     --kubeconfig "$KUBECONFIG_PATH" \
     --kube-context "$KUBE_CONTEXT" \
     --namespace "$NAMESPACE" \
     --values "$REPO_ROOT/infra/helm/insighthub/values-local.yaml" \
+    $EXTRA_VALUES_ARGS \
     --set-string "namespace=$NAMESPACE" \
     --rollback-on-failure --cleanup-on-fail --wait --timeout 8m
 

@@ -1,0 +1,109 @@
+# promtool unit tests for day4-rules.yaml.
+#
+# Each case builds a one hour flat baseline, then injects the failure the Day 4
+# chaos scripts produce, so the assertion proves the band actually reacts to the
+# incident rather than to an arbitrary threshold.
+rule_files:
+  - day4-rules.yaml
+
+evaluation_interval: 30s
+
+tests:
+  # Incident 2: worker stops, ARQ queue grows.
+  - interval: 30s
+    name: queue backlog crosses its anomaly band
+    input_series:
+      # Measured by redis_exporter, so the series survives the worker going away.
+      - series: 'redis_key_size{key="arq:queue",job="insighthub-redis-exporter"}'
+        values: "1+0x120 50+0x21"
+      # The worker gauge disappears when it is scaled down; the rule must not
+      # depend on it.
+      - series: 'insighthub_worker_queue_depth{job="insighthub-worker"}'
+        values: "1+0x120 _x21"
+    promql_expr_test:
+      - expr: insighthub:queue_depth:avg5m
+        eval_time: 55m
+        exp_samples:
+          - labels: '{__name__="insighthub:queue_depth:avg5m"}'
+            value: 1
+    alert_rule_test:
+      - alertname: IngestionQueueBacklogAnomaly
+        eval_time: 55m
+        exp_alerts: []
+      - alertname: IngestionQueueBacklogAnomaly
+        eval_time: 68m
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              component: ingestion-worker
+              signal: saturation
+            exp_annotations:
+              summary: ARQ queue depth is above its one hour anomaly band
+              value: "50"
+              runbook_url: https://github.com/DamAnhTuanTB/insighthub/blob/main/observability/RUNBOOK.md#ingestionqueuebackloganomaly
+
+  # Incident 3: database unavailable, API returns 5xx.
+  - interval: 30s
+    name: error ratio crosses its anomaly band
+    input_series:
+      - series: 'insighthub_http_requests_total{endpoint="/chat",method="POST",status="200"}'
+        values: "0+10x120 1200+0x21"
+      - series: 'insighthub_http_requests_total{endpoint="/chat",method="POST",status="500"}'
+        values: "0+0x120 0+10x21"
+    alert_rule_test:
+      - alertname: APIErrorRateAnomaly
+        eval_time: 55m
+        exp_alerts: []
+      - alertname: APIErrorRateAnomaly
+        eval_time: 68m
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              component: api
+              signal: errors
+            exp_annotations:
+              summary: API 5xx ratio is above its one hour anomaly band
+              value: "1"
+              runbook_url: https://github.com/DamAnhTuanTB/insighthub/blob/main/observability/RUNBOOK.md#apierrorrateanomaly
+
+  # Incident 1: fixture generation is deliberately slowed down.
+  - interval: 30s
+    name: LLM latency p95 crosses its anomaly band
+    input_series:
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="0.25"}'
+        values: "0+2x120 240+0x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="0.5"}'
+        values: "0+2x120 240+0x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="1"}'
+        values: "0+2x120 240+0x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="2.5"}'
+        values: "0+2x120 240+0x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="5"}'
+        values: "0+2x120 240+2x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="10"}'
+        values: "0+2x120 240+2x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="20"}'
+        values: "0+2x120 240+2x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="60"}'
+        values: "0+2x120 240+2x21"
+      - series: 'insighthub_llm_call_latency_seconds_bucket{le="+Inf"}'
+        values: "0+2x120 240+2x21"
+      # The p95 rule only emits while traffic exists, so the test has to supply
+      # the request counter alongside the buckets.
+      - series: 'insighthub_llm_call_latency_seconds_count'
+        values: "0+2x120 240+2x21"
+    alert_rule_test:
+      - alertname: LLMLatencyAnomaly
+        eval_time: 55m
+        exp_alerts: []
+      - alertname: LLMLatencyAnomaly
+        eval_time: 68m
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              component: api
+              signal: latency
+            exp_annotations:
+              summary: LLM call p95 latency is above its one hour anomaly band
+              value: "4.875"
+              runbook_url: https://github.com/DamAnhTuanTB/insighthub/blob/main/observability/RUNBOOK.md#llmlatencyanomaly

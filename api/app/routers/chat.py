@@ -1,11 +1,13 @@
 """RAG executes in FastAPI's threadpool; usage preserves its provenance."""
 
+import random
 import time
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.config import get_settings
 from app.core.metrics import llm_call_latency, llm_tokens_total, rag_query_latency
 from app.services.llm import generate
 from app.services.retrieval import retrieve
@@ -36,8 +38,22 @@ class ChatResponse(BaseModel):
     usage: TokenUsage
 
 
+def _injected_chat_failure() -> None:
+    """Day 4 fault injection for the error-rate scenario.
+
+    Taking the database away instead would fail the readiness probe, drop the pod
+    out of the Service, and produce no requests at all rather than failed ones.
+    Configuration refuses this flag outside fixture mode.
+    """
+    settings = get_settings()
+    if settings.chaos_enabled and settings.chaos_chat_error_ratio:
+        if random.random() < settings.chaos_chat_error_ratio:
+            raise HTTPException(500, "Injected fault for the Day 4 error-rate drill.")
+
+
 @router.post("", response_model=ChatResponse)
 def chat(req: ChatRequest):
+    _injected_chat_failure()
     start = time.perf_counter()
     with rag_query_latency.time():
         contexts = retrieve(req.question, top_k=req.top_k)

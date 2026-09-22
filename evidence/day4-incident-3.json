@@ -1,0 +1,162 @@
+{
+  "incident_id": "incident-3",
+  "started_at": "2026-09-22T15:00:48Z",
+  "ended_at": "2026-09-22T15:22:01Z",
+  "failure_start": "2026-09-22T15:05:54Z",
+  "failure_end": "2026-09-22T15:15:54Z",
+  "title": "API 5xx ratio breached its anomaly band while every dependency stayed healthy",
+  "summary": "The 5xx ratio rose from a flat zero baseline to 0.1058 for about ten minutes. Both the database exporter and the API scrape target reported healthy for the entire window, which moves the cause into the application rather than its dependencies.",
+  "hypotheses": [
+    "The API returned genuine 5xx responses. insighthub:http_error_ratio:5m went from 0.0 to 0.1058 against a band of 0.0634, and the ratio is computed only from status=~\"5..\", so 4xx validation rejections are excluded by construction.",
+    "Not a database outage. pg_up stayed at 1 for every sample in the window, so postgres_exporter kept its connection open the whole time. A database failure would have driven it to 0 before the errors appeared.",
+    "Not an API outage. up{job=\"insighthub-api\"} stayed at 1, so Prometheus kept scraping the pod successfully. The API was alive and answering, and it was answering with errors.",
+    "Not a timeout or slowdown. insighthub:llm_latency_p95:5m held at 0.2375 through the whole window, unchanged from baseline, so requests were failing fast rather than exhausting a deadline.",
+    "The observed ratio is lower than the injected ratio because the denominator covers all HTTP traffic, including readiness probes and document listings, while the injection only affects the chat handler. That gap is expected, not evidence against the diagnosis."
+  ],
+  "root_cause": "scripts/chaos/inject-error-burst.sh set CHAOS_CHAT_ERROR_RATIO=0.6 on the api deployment, making the chat handler raise a 500 for a share of requests. The failure was injected inside the handler precisely so the API would stay in the Service and the errors would be measurable; removing the database instead fails the readiness probe, drops the pod out of the endpoints, and produces silence rather than an error signal.",
+  "confidence": 0.93,
+  "correlation": [
+    "pg_up and up both held at 1 while the error ratio climbed, which separates application failure from dependency failure.",
+    "Latency stayed flat, which separates failing fast from timing out.",
+    "The ratio returned to zero as soon as the flag was cleared, matching the recovery boundary of the injection window."
+  ],
+  "remediation": [
+    "Clear CHAOS_ENABLED and CHAOS_CHAT_ERROR_RATIO on the api deployment.",
+    "Keep the alert expression restricted to 5xx so client-side validation failures cannot raise it.",
+    "Add a per-endpoint error breakdown so a handler-scoped fault is visible without correlating against dependency health first."
+  ],
+  "detection": {
+    "alert": "APIErrorRateAnomaly",
+    "fired": true,
+    "condition": "5xx ratio above mean+3*stddev of the offset one hour baseline, and above a 5% floor, sustained for 2m",
+    "delivered_to": "Slack #alerts"
+  },
+  "evidence_source": {
+    "prometheus_url": "http://127.0.0.1:9090",
+    "collected_at": "2026-09-22T15:40:32Z",
+    "collector": "scripts/day4/collect-samples.py",
+    "note": "Every value below was read from Prometheus, not authored by a model."
+  },
+  "samples": [
+    {
+      "metric": "insighthub:http_error_ratio:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T15:00:48Z",
+      "value": 0.0
+    },
+    {
+      "metric": "insighthub:http_error_ratio:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T15:11:18Z",
+      "value": 0.10578316546186319
+    },
+    {
+      "metric": "insighthub:http_error_ratio:5m",
+      "labels": {},
+      "timestamp": "2026-09-22T15:21:48Z",
+      "value": 0.0
+    },
+    {
+      "metric": "insighthub:http_error_ratio:anomaly_upper",
+      "labels": {},
+      "timestamp": "2026-09-22T15:00:48Z",
+      "value": 0.0
+    },
+    {
+      "metric": "insighthub:http_error_ratio:anomaly_upper",
+      "labels": {},
+      "timestamp": "2026-09-22T15:11:18Z",
+      "value": 0.0
+    },
+    {
+      "metric": "insighthub:http_error_ratio:anomaly_upper",
+      "labels": {},
+      "timestamp": "2026-09-22T15:21:48Z",
+      "value": 0.07805571776682217
+    },
+    {
+      "metric": "pg_up",
+      "labels": {
+        "container": "exporter",
+        "endpoint": "metrics",
+        "instance": "10.244.0.30:9187",
+        "job": "insighthub-postgres-exporter",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-postgres-exporter-57689fc64-6rhrh",
+        "service": "insighthub-postgres-exporter"
+      },
+      "timestamp": "2026-09-22T15:00:48Z",
+      "value": 1.0
+    },
+    {
+      "metric": "pg_up",
+      "labels": {
+        "container": "exporter",
+        "endpoint": "metrics",
+        "instance": "10.244.0.30:9187",
+        "job": "insighthub-postgres-exporter",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-postgres-exporter-57689fc64-6rhrh",
+        "service": "insighthub-postgres-exporter"
+      },
+      "timestamp": "2026-09-22T15:11:18Z",
+      "value": 1.0
+    },
+    {
+      "metric": "pg_up",
+      "labels": {
+        "container": "exporter",
+        "endpoint": "metrics",
+        "instance": "10.244.0.30:9187",
+        "job": "insighthub-postgres-exporter",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-postgres-exporter-57689fc64-6rhrh",
+        "service": "insighthub-postgres-exporter"
+      },
+      "timestamp": "2026-09-22T15:21:48Z",
+      "value": 1.0
+    },
+    {
+      "metric": "up",
+      "labels": {
+        "container": "api",
+        "endpoint": "http",
+        "instance": "10.244.0.41:8000",
+        "job": "insighthub-api",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-api-5fddd97b9c-lfzdk",
+        "service": "insighthub-api"
+      },
+      "timestamp": "2026-09-22T15:06:18Z",
+      "value": 1.0
+    },
+    {
+      "metric": "up",
+      "labels": {
+        "container": "api",
+        "endpoint": "http",
+        "instance": "10.244.0.41:8000",
+        "job": "insighthub-api",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-api-5fddd97b9c-lfzdk",
+        "service": "insighthub-api"
+      },
+      "timestamp": "2026-09-22T15:11:18Z",
+      "value": 1.0
+    },
+    {
+      "metric": "up",
+      "labels": {
+        "container": "api",
+        "endpoint": "http",
+        "instance": "10.244.0.41:8000",
+        "job": "insighthub-api",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-api-5fddd97b9c-lfzdk",
+        "service": "insighthub-api"
+      },
+      "timestamp": "2026-09-22T15:15:48Z",
+      "value": 1.0
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{{- if .Values.observability.enabled }}
+# The worker serves no application traffic; this Service exists only so
+# Prometheus can discover its metrics endpoint.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "insighthub.fullname" . }}-worker
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "insighthub.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+  ports:
+    - name: metrics
+      port: {{ .Values.observability.worker.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+{{- end }}

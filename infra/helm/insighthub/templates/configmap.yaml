@@ -15,3 +15,4 @@ data:
   EMBEDDING_REVISION: {{ .Values.config.embeddingRevision | quote }}
   LLM_MAX_TOKENS: {{ .Values.config.llmMaxTokens | quote }}
   PROVIDER_TIMEOUT_SECONDS: {{ .Values.config.providerTimeoutSeconds | quote }}
+  WORKER_METRICS_PORT: {{ .Values.observability.worker.metricsPort | quote }}

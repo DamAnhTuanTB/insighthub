@@ -1,0 +1,169 @@
+{{- if and .Values.observability.enabled .Values.observability.exporters.enabled }}
+{{- $top := . }}
+{{- $fullname := include "insighthub.fullname" . }}
+{{- $exporters := .Values.observability.exporters }}
+{{- range $name, $spec := dict "postgres-exporter" $exporters.postgres "redis-exporter" $exporters.redis "blackbox-exporter" $exporters.blackbox }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullname }}-{{ $name }}
+  namespace: {{ $top.Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" $top | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "insighthub.selectorLabels" $top | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+  ports:
+    - name: metrics
+      port: {{ $spec.port }}
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullname }}-{{ $name }}
+  namespace: {{ $top.Values.namespace }}
+  labels:
+    {{- include "insighthub.labels" $top | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "insighthub.selectorLabels" $top | nindent 6 }}
+      app.kubernetes.io/component: {{ $name }}
+  template:
+    metadata:
+      labels:
+        {{- include "insighthub.selectorLabels" $top | nindent 8 }}
+        app.kubernetes.io/component: {{ $name }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      {{- if eq $name "redis-exporter" }}
+      initContainers:
+        - name: render-password-map
+          image: {{ $top.Values.localDependencies.redis.image | quote }}
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-ec"]
+          args:
+            - |
+              umask 077
+              printf '{"redis://%s-redis:6379":"%s"}' "{{ $fullname }}" "$(cat /run/insighthub-secrets/REDIS_PASSWORD)" \
+                > /run/exporter/passwords.json
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $exporters.resources | nindent 12 }}
+          volumeMounts:
+            - name: runtime-secrets
+              mountPath: /run/insighthub-secrets
+              readOnly: true
+            - name: exporter-runtime
+              mountPath: /run/exporter
+      {{- end }}
+      containers:
+        - name: exporter
+          image: {{ printf "%s@%s" (splitList ":" $spec.image | first) $spec.digest | quote }}
+          imagePullPolicy: IfNotPresent
+          {{- if eq $name "postgres-exporter" }}
+          env:
+            # Local dependency has no TLS. The password is read from a mounted
+            # file, never from an environment variable.
+            - name: DATA_SOURCE_URI
+              value: {{ printf "%s-postgres:5432/%s?sslmode=disable" $fullname $top.Values.localDependencies.postgres.database | quote }}
+            - name: DATA_SOURCE_USER
+              value: {{ $top.Values.localDependencies.postgres.user | quote }}
+            - name: DATA_SOURCE_PASS_FILE
+              value: /run/insighthub-secrets/POSTGRES_PASSWORD
+          {{- else if eq $name "redis-exporter" }}
+          env:
+            - name: REDIS_ADDR
+              value: {{ printf "redis://%s-redis:6379" $fullname | quote }}
+            # Queue depth has to be observable while the worker is down, which is
+            # exactly when it matters. Reading the ARQ sorted set here keeps the
+            # signal alive when the worker that would otherwise publish it is gone.
+            - name: REDIS_EXPORTER_CHECK_KEYS
+              value: {{ $top.Values.observability.exporters.redis.checkKeys | quote }}
+            # redis_exporter expects a JSON address->password map here, not a
+            # bare password, so an init container renders one from the Secret.
+            - name: REDIS_PASSWORD_FILE
+              value: /run/exporter/passwords.json
+          {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ $spec.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ if eq $name "blackbox-exporter" }}/-/healthy{{ else }}/metrics{{ end }}
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: {{ if eq $name "blackbox-exporter" }}/-/healthy{{ else }}/metrics{{ end }}
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $exporters.resources | nindent 12 }}
+          {{- if eq $name "postgres-exporter" }}
+          volumeMounts:
+            - name: runtime-secrets
+              mountPath: /run/insighthub-secrets
+              readOnly: true
+          {{- else if eq $name "redis-exporter" }}
+          volumeMounts:
+            - name: exporter-runtime
+              mountPath: /run/exporter
+              readOnly: true
+          {{- end }}
+      {{- if ne $name "blackbox-exporter" }}
+      volumes:
+        - name: runtime-secrets
+          secret:
+            secretName: {{ $top.Values.runtime.existingSecret }}
+            defaultMode: 0440
+            items:
+              {{- if eq $name "postgres-exporter" }}
+              - key: POSTGRES_PASSWORD
+                path: POSTGRES_PASSWORD
+              {{- else }}
+              - key: REDIS_PASSWORD
+                path: REDIS_PASSWORD
+              {{- end }}
+        {{- if eq $name "redis-exporter" }}
+        - name: exporter-runtime
+          emptyDir:
+            sizeLimit: 1Mi
+        {{- end }}
+      {{- end }}
+---
+{{- end }}
+{{- end }}

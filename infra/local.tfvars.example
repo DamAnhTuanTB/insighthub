@@ -1,0 +1,7 @@
+environment          = "dev"
+namespace            = "insighthub-dev"
+owner                = "student"
+cost_center          = "learning"
+kubeconfig_path      = "~/.kube/config"
+kube_context         = null
+service_account_name = "insighthub"

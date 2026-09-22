@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unsafe
+spec:
+  selector:
+    matchLabels:
+      app: unsafe
+  template:
+    metadata:
+      labels:
+        app: unsafe
+    spec:
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: false
+      containers:
+        - name: unsafe
+          image: example.invalid/unsafe:latest
+          securityContext:
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["NET_RAW"]
+          resources: {}

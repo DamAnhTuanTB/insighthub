@@ -1,0 +1,107 @@
+nameOverride: ""
+fullnameOverride: ""
+namespace: insighthub-dev
+
+serviceAccount:
+  name: insighthub
+
+runtime:
+  existingSecret: runtime
+  configMapName: settings
+
+images:
+  web:
+    repository: insighthub-web
+    tag: local
+    digest: ""
+    pullPolicy: IfNotPresent
+  api:
+    repository: insighthub-api
+    tag: local
+    digest: ""
+    pullPolicy: IfNotPresent
+  worker:
+    repository: insighthub-worker
+    tag: local
+    digest: ""
+    pullPolicy: IfNotPresent
+
+config:
+  environment: local
+  logLevel: INFO
+  ragMode: fixture
+  llmProvider: fixture
+  embeddingProvider: fixture
+  embeddingDimension: "1024"
+  embeddingRevision: "1"
+  llmMaxTokens: "1024"
+  providerTimeoutSeconds: "60"
+
+web:
+  replicas: 1
+  service:
+    port: 3000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+api:
+  replicas: 1
+  service:
+    port: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+worker:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+localDependencies:
+  enabled: true
+  databaseInitConfigMap: db-init
+  postgres:
+    image: pgvector/pgvector:0.8.2-pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
+    database: insighthub
+    user: insighthub
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+  redis:
+    image: redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 300m
+        memory: 192Mi
+
+ingress:
+  enabled: false
+  className: nginx
+  host: insighthub.local
+  tlsSecretName: insighthub-local-tls

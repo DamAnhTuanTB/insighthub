@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: safe
+  labels:
+    app.kubernetes.io/name: insighthub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: insighthub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: insighthub
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: safe
+          image: example.invalid/insighthub:test
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

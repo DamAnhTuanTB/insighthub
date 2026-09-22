@@ -1,0 +1,218 @@
+name: Day 3 local IaC
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - "scripts/day3-*"
+      - "scripts/day3_*"
+      - "tests/milestones/day3/**"
+      - ".github/workflows/iac.yml"
+      - ".tool-versions"
+      - "Makefile"
+  push:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - "scripts/day3-*"
+      - "scripts/day3_*"
+      - "tests/milestones/day3/**"
+      - ".github/workflows/iac.yml"
+      - ".tool-versions"
+      - "Makefile"
+  workflow_dispatch:
+    inputs:
+      deploy_local:
+        description: "Deploy to a connected self-hosted local Kubernetes runner"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  TF_VERSION: 1.14.6
+  TFLINT_VERSION: v0.64.0
+  HELM_VERSION: v4.3.0
+  CONFTEST_IMAGE: openpolicyagent/conftest:v0.68.2
+  CHECKOV_IMAGE: bridgecrew/checkov:3.3.8
+  TF_IN_AUTOMATION: "true"
+
+jobs:
+  fmt:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+      - run: terraform -chdir=infra fmt -check -recursive
+
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: terraform-linters/setup-tflint@1cf010d3c7aef302051ccdb68c14c5dc2efa34ef # v6.3.1
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+          cache: true
+          tflint_config_path: infra/.tflint.hcl
+      - run: tflint --init --config="$GITHUB_WORKSPACE/infra/.tflint.hcl"
+        working-directory: infra
+      - run: tflint --recursive --format compact --config="$GITHUB_WORKSPACE/infra/.tflint.hcl"
+        working-directory: infra
+
+  security-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run pinned Checkov image
+        run: docker run --rm -v "$PWD:/workspace:ro" -w /workspace "$CHECKOV_IMAGE" -d infra --quiet --framework terraform kubernetes helm --skip-path infra/policy/tests
+
+  policy-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@v5.0.0
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - name: Verify safe and unsafe policy fixtures
+        run: |
+          docker run --rm -v "$PWD:/project" -w /project "$CONFTEST_IMAGE" test --policy infra/policy/terraform infra/policy/tests/terraform-safe.json
+          docker run --rm -v "$PWD:/project" -w /project "$CONFTEST_IMAGE" test --policy infra/policy/kubernetes infra/policy/tests/kubernetes-safe.yaml
+          if docker run --rm -v "$PWD:/project" -w /project "$CONFTEST_IMAGE" test --policy infra/policy/terraform infra/policy/tests/terraform-unsafe.json; then exit 1; fi
+          if docker run --rm -v "$PWD:/project" -w /project "$CONFTEST_IMAGE" test --policy infra/policy/kubernetes infra/policy/tests/kubernetes-unsafe.yaml; then exit 1; fi
+      - name: Render and check the Helm release
+        run: |
+          helm lint infra/helm/insighthub --values infra/helm/insighthub/values-local.yaml
+          helm template insighthub infra/helm/insighthub --namespace insighthub-dev --values infra/helm/insighthub/values-local.yaml > "$RUNNER_TEMP/rendered.yaml"
+          docker run --rm -v "$RUNNER_TEMP:/work:ro" -v "$PWD/infra/policy:/policy:ro" "$CONFTEST_IMAGE" test --policy /policy/kubernetes /work/rendered.yaml
+
+  plan:
+    needs: [fmt, lint, security-scan, policy-check]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+      - name: Create non-routable CI kubeconfig
+        run: |
+          printf '%s\n' \
+            'apiVersion: v1' \
+            'kind: Config' \
+            'clusters:' \
+            '- name: ci-static' \
+            '  cluster:' \
+            '    server: https://127.0.0.1:65535' \
+            '    insecure-skip-tls-verify: true' \
+            'contexts:' \
+            '- name: ci-static' \
+            '  context:' \
+            '    cluster: ci-static' \
+            '    user: ci-static' \
+            'current-context: ci-static' \
+            'users:' \
+            '- name: ci-static' \
+            '  user:' \
+            '    token: non-secret-ci-placeholder' > "$RUNNER_TEMP/kubeconfig"
+      - run: terraform -chdir=infra init -input=false -reconfigure -backend-config="path=$RUNNER_TEMP/terraform.tfstate"
+      - run: terraform -chdir=infra validate -no-color
+      - name: Static local plan
+        run: terraform -chdir=infra plan -refresh=false -input=false -out="$RUNNER_TEMP/tfplan" -var="kubeconfig_path=$RUNNER_TEMP/kubeconfig" -var="kube_context=ci-static"
+      - name: Policy-check actual plan JSON
+        run: |
+          terraform -chdir=infra show -json "$RUNNER_TEMP/tfplan" > "$RUNNER_TEMP/tfplan.json"
+          docker run --rm -v "$RUNNER_TEMP:/work:ro" -v "$PWD/infra/policy:/policy:ro" "$CONFTEST_IMAGE" test --policy /policy/terraform /work/tfplan.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-static-plan
+          path: ${{ runner.temp }}/tfplan.json
+          retention-days: 3
+
+  cost-estimate:
+    needs: policy-check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@v5.0.0
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - name: Render declared capacity
+        run: helm template insighthub infra/helm/insighthub --namespace insighthub-dev --values infra/helm/insighthub/values-local.yaml > "$RUNNER_TEMP/rendered.yaml"
+      - name: Calculate local resource budget
+        run: |
+          python3 -m venv "$RUNNER_TEMP/verify-venv"
+          "$RUNNER_TEMP/verify-venv/bin/pip" install --require-hashes -r scripts/requirements-verification.txt
+          "$RUNNER_TEMP/verify-venv/bin/python" scripts/day3_local_budget.py --manifest "$RUNNER_TEMP/rendered.yaml" --output "$RUNNER_TEMP/local-budget.json"
+          cat "$RUNNER_TEMP/local-budget.json" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-resource-budget
+          path: ${{ runner.temp }}/local-budget.json
+          retention-days: 7
+
+  provenance:
+    needs: [plan, cost-estimate]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@v5.0.0
+        with:
+          version: ${{ env.HELM_VERSION }}
+      - name: Bind rendered deployment to source
+        run: |
+          helm template insighthub infra/helm/insighthub --namespace insighthub-dev --values infra/helm/insighthub/values-local.yaml > "$RUNNER_TEMP/deployment.yaml"
+          source_sha256="$(python3 scripts/verify.py fingerprint)"
+          artifact_sha256="$(sha256sum "$RUNNER_TEMP/deployment.yaml" | cut -d ' ' -f 1)"
+          printf '{"source_sha256":"%s","artifact_sha256":"%s"}\n' "$source_sha256" "$artifact_sha256" > "$RUNNER_TEMP/source-manifest.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verification-source
+          path: |
+            ${{ runner.temp }}/source-manifest.json
+            ${{ runner.temp }}/deployment.yaml
+          retention-days: 7
+
+  apply:
+    needs: [plan, cost-estimate]
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_local
+    runs-on: [self-hosted, insighthub-local]
+    timeout-minutes: 30
+    environment: local-kubernetes
+    concurrency:
+      group: insighthub-local-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Apply reviewed source to the connected local cluster
+        run: scripts/day3-local-deploy.sh
+
+  smoke:
+    needs: apply
+    runs-on: [self-hosted, insighthub-local]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: scripts/day3-local-smoke.sh

@@ -1,0 +1,11 @@
+# Local override intentionally keeps fixture providers and ephemeral data.
+config:
+  ragMode: fixture
+  llmProvider: fixture
+  embeddingProvider: fixture
+
+localDependencies:
+  enabled: true
+
+ingress:
+  enabled: false

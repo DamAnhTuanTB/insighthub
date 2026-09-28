@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     voyage_api_key: str = Field(default="", repr=False)
     voyage_embedding_model: str = "voyage-3.5"
     openai_api_key: str = Field(default="", repr=False)
+    # Day 6: keep gateway credentials distinct from direct provider credentials.
+    # When set, this key is preferred for OpenAI-compatible LiteLLM traffic.
+    litellm_api_key: str = Field(default="", repr=False)
     # Required explicitly for OpenAI, including OpenAI-compatible gateways.
     openai_base_url: str = ""
     openai_chat_model: str = ""
@@ -85,7 +88,12 @@ class Settings(BaseSettings):
             raise ValueError("Fixture providers require RAG_MODE=fixture")
         for provider in {self.llm_provider, self.embedding_provider}:
             if provider in {"gemini", "anthropic", "voyage", "openai"}:
-                if not getattr(self, f"{provider}_api_key"):
+                key = (
+                    self.openai_auth_key
+                    if provider == "openai"
+                    else getattr(self, f"{provider}_api_key")
+                )
+                if not key:
                     raise ValueError(f"{provider.upper()}_API_KEY is required")
             if provider in {"ollama", "openai"}:
                 value = getattr(self, f"{provider}_base_url")
@@ -127,6 +135,11 @@ class Settings(BaseSettings):
             if self.embedding_dim != 1024:
                 raise ValueError("mxbai-embed-large requires EMBEDDING_DIM=1024")
         return self
+
+    @property
+    def openai_auth_key(self) -> str:
+        """Credential for OpenAI-compatible APIs; LiteLLM wins when configured."""
+        return self.litellm_api_key or self.openai_api_key
 
     @property
     def resolved_chat_model(self) -> str:

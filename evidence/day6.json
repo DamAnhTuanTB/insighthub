@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "day": 6,
+  "mode": "real",
+  "observed_at": "2026-09-28T09:39:38.928930+00:00",
+  "source_sha256": "116ce9f3d0854dcda0d734eebb79436232e81f993080edc7a7009200f74e4ca8",
+  "artifacts": {
+    "dataset": {
+      "path": "security/datasets/day6-cases.json",
+      "sha256": "004c6e337e776b81916a25772623210b70000a33c715ededd04b710976dd4898"
+    },
+    "eval_initial": {
+      "path": "security/reports/eval-initial.json",
+      "sha256": "6a4563e2bc006af3d3d66a6d6565015c2057d89b58ce1b434d5277ea74adc3a8"
+    },
+    "eval_final": {
+      "path": "security/reports/eval-final.json",
+      "sha256": "2f16020f5c618c7a99a773ac5a61c11621607cde5d0ac381623ad4cb2e629579"
+    },
+    "cost": {
+      "path": "security/reports/cost-report.json",
+      "sha256": "c6ef87ebed3b9944cd031bab81c6c9edb8017af029a86dfcca687b6e96c5c619"
+    }
+  },
+  "review": {
+    "cases": 62,
+    "final_high_or_critical_open": 0,
+    "runtime": "LiteLLM/PostgreSQL -> Ollama, guarded by security-gateway",
+    "aws_used": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "mode": "real",
+  "observed_at": "2026-09-28T09:36:35.492224+00:00",
+  "checks": {
+    "health": "passed",
+    "three_virtual_key_workloads": "passed",
+    "poison_upload_retrieval_block": "passed",
+    "benign_rag_regression": "passed"
+  },
+  "traces": [
+    {
+      "workflow": "chatops",
+      "workflow_contract": "response synthesis from bounded tool context",
+      "request_id": "chatcmpl-344ee34a-da38-47e0-9333-8f127ad5353f",
+      "model": "insighthub-chat",
+      "input_tokens": 52,
+      "output_tokens": 48,
+      "status": "allowed"
+    },
+    {
+      "workflow": "coding",
+      "workflow_contract": "review with context, proposed diff, and test evidence",
+      "request_id": "chatcmpl-d15a0b6f-7070-4166-89a6-750d5969a4b3",
+      "model": "insighthub-chat",
+      "input_tokens": 69,
+      "output_tokens": 48,
+      "status": "allowed"
+    },
+    {
+      "workflow": "insighthub",
+      "workflow_contract": "real upload, embedding, retrieval, and grounded chat",
+      "request_id": "recorded-in-content-free-gateway-audit",
+      "model": "insighthub-chat",
+      "input_tokens": 168,
+      "output_tokens": 43,
+      "status": "allowed",
+      "rag_document_id": 9,
+      "poisoned_document_id_deleted_after_test": 10
+    }
+  ]
+}

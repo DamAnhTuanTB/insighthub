@@ -57,5 +57,10 @@ evidence/*
 !evidence/day5.json
 !evidence/day5-*.json
 !evidence/day5-*.md
+!evidence/day6.json
+!evidence/day6-*.json
+!evidence/day6-*.md
 reports/
+!security/reports/
+!security/reports/**
 *.tsbuildinfo

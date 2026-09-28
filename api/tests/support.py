@@ -30,6 +30,7 @@ def configured(**values):
         "ANTHROPIC_API_KEY": "",
         "VOYAGE_API_KEY": "",
         "OPENAI_API_KEY": "",
+        "LITELLM_API_KEY": "",
         "GEMINI_CHAT_MODEL": "",
         "ANTHROPIC_CHAT_MODEL": "",
         "OLLAMA_CHAT_MODEL": "",

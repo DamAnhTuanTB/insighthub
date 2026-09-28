@@ -89,6 +89,16 @@ class ConfigTests(unittest.TestCase):
         with configured() as settings:
             self.assertNotEqual(baseline, settings.embedding_identity_id)
 
+    def test_litellm_key_is_explicit_and_preferred_for_gateway(self):
+        with real_config(
+            openai_api_key="", litellm_api_key="sk-local-virtual-key"
+        ) as settings:
+            self.assertEqual(settings.openai_auth_key, "sk-local-virtual-key")
+        with real_config(
+            openai_api_key="direct-key", litellm_api_key="sk-gateway"
+        ) as settings:
+            self.assertEqual(settings.openai_auth_key, "sk-gateway")
+
     def test_chunking_progress_overlap_and_empty(self):
         with configured(chunk_size=4, chunk_overlap=2):
             self.assertEqual(chunk_text("a b c d e f g"), ["a b c", "c d e", "e f g"])

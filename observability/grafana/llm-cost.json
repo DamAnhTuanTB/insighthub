@@ -1,0 +1,62 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "LLM Cost Rate by Workflow",
+      "type": "timeseries",
+      "description": "Declared local chargeback USD/hour, attributed at the guardrail.",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (workflow) (rate(insighthub_llm_cost_usd_total[5m])) * 3600",
+          "legendFormat": "{{workflow}}"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "currencyUSD"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+    },
+    {
+      "id": 2,
+      "title": "LLM Tokens by Workflow and Direction",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (workflow, direction) (rate(insighthub_llm_tokens_total[5m]))",
+          "legendFormat": "{{workflow}} {{direction}}"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "tps"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+    },
+    {
+      "id": 3,
+      "title": "Guardrail Decisions",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (workflow, decision, reason) (increase(insighthub_guardrail_requests_total[15m]))",
+          "legendFormat": "{{workflow}} {{decision}} {{reason}}"
+        }
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 41,
+  "tags": ["insighthub", "day6", "finops"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "InsightHub LLM Cost",
+  "uid": "insighthub-llm-cost",
+  "version": 1
+}

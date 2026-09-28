@@ -14,7 +14,7 @@ NAMESPACE ?= insighthub-dev
 KUBE_CONTEXT ?= $(shell kubectl config current-context 2>/dev/null)
 KUBECONFIG_PATH ?= $(if $(KUBECONFIG),$(KUBECONFIG),$(HOME)/.kube/config)
 
-.PHONY: up down test test-backend test-worker test-verifiers test-mcp test-day1 verify-day1 smoke tools build ci worker-logs day3-fmt day3-init day3-validate day3-lint day3-scan day3-policy day3-render day3-budget day3-static day3-local-plan day3-local-up day3-local-smoke day3-local-down day4-monitoring-up day4-app-up day4-rules day4-dashboard day4-slack day4-loadgen-up day4-loadgen-down day4-forward day4-stop-forward day4-status day4-incident-1 day4-incident-2 day4-incident-3 day4-samples day4-verify day4-down test-day5 verify-day5 day5-local-pass day5-rbac day5-redis-up day5-redis-down
+.PHONY: up down test test-backend test-worker test-verifiers test-mcp test-day1 verify-day1 smoke tools build ci worker-logs day3-fmt day3-init day3-validate day3-lint day3-scan day3-policy day3-render day3-budget day3-static day3-local-plan day3-local-up day3-local-smoke day3-local-down day4-monitoring-up day4-app-up day4-rules day4-dashboard day4-slack day4-loadgen-up day4-loadgen-down day4-forward day4-stop-forward day4-status day4-incident-1 day4-incident-2 day4-incident-3 day4-samples day4-verify day4-down test-day5 verify-day5 day5-local-pass day5-rbac day5-redis-up day5-redis-down day6-local-up day6-e2e test-day6 verify-day6 day6-local-pass day6-down
 up:
 	$(COMPOSE) up --build -d --wait
 down:
@@ -129,6 +129,21 @@ day5-redis-up:
 	$(COMPOSE) -f docker-compose.yml -f docker-compose.day5.yml up -d --wait redis
 day5-redis-down:
 	$(COMPOSE) -f docker-compose.yml -f docker-compose.day5.yml stop redis
+
+# ---- Day 6: real local Ollama through LiteLLM + guardrails ----
+day6-local-up:
+	scripts/day6/up.sh
+day6-e2e:
+	$(PYTHON) scripts/day6/live_e2e.py
+test-day6:
+	mkdir -p tmp/day6
+	INSIGHTHUB_REPO_ROOT="$(CURDIR)" INSIGHTHUB_VERIFY_RUN_ID="manual-day6" INSIGHTHUB_VERIFY_OBSERVATIONS="$(CURDIR)/tmp/day6/manual-observations.json" DAY6_GATEWAY_URL="http://127.0.0.1:4001" DAY6_LITELLM_URL="http://127.0.0.1:14000" $(VERIFY_PYTHON) -m pytest -c /dev/null -p no:cacheprovider tests/milestones/day6 -v
+verify-day6:
+	$(VERIFY_PYTHON) -B scripts/verify.py day6 --evidence-dir evidence --test-timeout 900 --timeout 30
+day6-local-pass:
+	scripts/day6/local-pass.sh
+day6-down:
+	scripts/day6/down.sh
 test: test-verifiers test-backend test-worker test-mcp
 smoke:
 	$(PYTHON) scripts/verify.py smoke --api-url "$(API_URL)" --web-url "$(WEB_URL)"

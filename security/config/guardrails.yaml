@@ -1,0 +1,17 @@
+version: 1
+mode: fail_closed
+layers:
+  - name: request_boundary
+    controls: [body_size_limit, strict_json, virtual_key_auth]
+  - name: input_guardrail
+    controls: [direct_injection, indirect_injection, pii, excessive_agency]
+  - name: prompt_boundary
+    controls: [untrusted_document_delimiting, instruction_precedence]
+  - name: gateway_policy
+    controls: [model_allowlist, per_key_budget, rate_limit, postgres_spend]
+  - name: output_guardrail
+    controls: [pii]
+  - name: audit_and_metrics
+    controls: [content_free_json_audit, bounded_labels, cost_attribution]
+blocked_response: Request blocked by InsightHub guardrail.
+audit_excludes: [prompt, document_text, response_text, credentials, provider_error_body]

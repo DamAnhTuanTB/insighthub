@@ -1,0 +1,144 @@
+services:
+  day6-postgres:
+    image: pgvector/pgvector:0.8.2-pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
+    environment:
+      POSTGRES_USER: insighthub
+      POSTGRES_PASSWORD: insighthub-day6-local
+      POSTGRES_DB: insighthub
+    volumes:
+      - day6-pgdata:/var/lib/postgresql/data
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U insighthub -d insighthub"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 768m
+
+  day6-redis:
+    image: redis:7.4-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - day6-redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 192m
+
+  litellm-db:
+    image: pgvector/pgvector:0.8.2-pg16@sha256:00ba258a66dac104fd5171074a0084462a64a1369d8513f3d0a634e2f24d15bc
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: litellm-local-only
+      POSTGRES_DB: litellm
+    volumes:
+      - litellm-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 512m
+
+  litellm:
+    image: docker.litellm.ai/berriai/litellm:main-stable@sha256:bd089afdcd35b894b14a93f9743cdc8b591f82da1a38dd43a010a7b0c9de5fd7
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      DATABASE_URL: postgresql://litellm:litellm-local-only@litellm-db:5432/litellm
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?run scripts/day6/bootstrap.py first}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?run scripts/day6/bootstrap.py first}
+      STORE_MODEL_IN_DB: "False"
+    volumes:
+      - ./security/config/litellm.yaml:/app/config.yaml:ro
+    ports:
+      - "127.0.0.1:${DAY6_LITELLM_PORT:-14000}:4000"
+    depends_on:
+      litellm-db: {condition: service_healthy}
+      ollama: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health/liveliness', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    mem_limit: 2g
+
+  security-gateway:
+    build: ./security/runtime
+    environment:
+      LITELLM_BASE_URL: http://litellm:4000
+      INSIGHTHUB_LITELLM_API_KEY: ${INSIGHTHUB_LITELLM_API_KEY:?run scripts/day6/bootstrap.py first}
+      CHATOPS_LITELLM_API_KEY: ${CHATOPS_LITELLM_API_KEY:?run scripts/day6/bootstrap.py first}
+      CODING_LITELLM_API_KEY: ${CODING_LITELLM_API_KEY:?run scripts/day6/bootstrap.py first}
+      GUARDRAIL_AUDIT_PATH: /data/audit.jsonl
+      DAY6_INPUT_USD_PER_TOKEN: "0.000001"
+      DAY6_OUTPUT_USD_PER_TOKEN: "0.000002"
+    volumes:
+      - ./tmp/day6/audit:/data
+    ports:
+      - "127.0.0.1:${SECURITY_GATEWAY_PORT:-4001}:8000"
+    depends_on:
+      litellm: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 256m
+
+  api:
+    environment:
+      DATABASE_URL: postgresql://insighthub:insighthub-day6-local@day6-postgres:5432/insighthub
+      REDIS_URL: redis://day6-redis:6379/0
+      RAG_MODE: real
+      LLM_PROVIDER: openai
+      EMBEDDING_PROVIDER: openai
+      LLM_MODEL: insighthub-chat
+      EMBEDDING_MODEL: insighthub-embedding
+      OPENAI_API_KEY: ""
+      LITELLM_API_KEY: ${INSIGHTHUB_LITELLM_API_KEY:?run scripts/day6/bootstrap.py first}
+      OPENAI_BASE_URL: http://security-gateway:8000/v1
+      LLM_MAX_TOKENS: 128
+      EMBEDDING_DIM: 1024
+      EMBEDDING_REVISION: day6-ollama-mxbai-v1
+      PROVIDER_TIMEOUT_SECONDS: 180
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      day6-postgres: {condition: service_healthy}
+      day6-redis: {condition: service_healthy}
+      security-gateway: {condition: service_healthy}
+
+  web:
+    ports: !override
+      - "127.0.0.1:${DAY6_WEB_PORT:-13000}:3000"
+
+  ingestion-worker:
+    environment:
+      DATABASE_URL: postgresql://insighthub:insighthub-day6-local@day6-postgres:5432/insighthub
+      REDIS_URL: redis://day6-redis:6379/0
+      RAG_MODE: real
+      LLM_PROVIDER: openai
+      EMBEDDING_PROVIDER: openai
+      LLM_MODEL: insighthub-chat
+      EMBEDDING_MODEL: insighthub-embedding
+      OPENAI_API_KEY: ""
+      LITELLM_API_KEY: ${INSIGHTHUB_LITELLM_API_KEY:?run scripts/day6/bootstrap.py first}
+      OPENAI_BASE_URL: http://security-gateway:8000/v1
+      LLM_MAX_TOKENS: 128
+      EMBEDDING_DIM: 1024
+      EMBEDDING_REVISION: day6-ollama-mxbai-v1
+      PROVIDER_TIMEOUT_SECONDS: 180
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      day6-postgres: {condition: service_healthy}
+      day6-redis: {condition: service_healthy}
+      security-gateway: {condition: service_healthy}
+
+volumes:
+  day6-pgdata:
+  day6-redisdata:
+  litellm-data:

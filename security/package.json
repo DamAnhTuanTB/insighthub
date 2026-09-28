@@ -1,0 +1,12 @@
+{
+  "name": "insighthub-day6-security-eval",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "eval": "promptfoo eval -c eval-config.yaml",
+    "validate": "promptfoo validate -c promptfooconfig.yaml && promptfoo validate -c eval-config.yaml"
+  },
+  "devDependencies": {
+    "promptfoo": "0.123.1"
+  }
+}

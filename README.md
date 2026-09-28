@@ -102,7 +102,7 @@ Với model thật, đặt `RAG_MODE=real`, chọn cả hai provider và cấu h
 | Fixture mặc định của Compose | `fixture` | `fixture` | `RAG_MODE=fixture`; không cần key/model download |
 | Gemini | `gemini` | `gemini` | `GEMINI_API_KEY`, chat model và embedding model được account hỗ trợ |
 | Anthropic | `anthropic` | `voyage` hoặc `openai` | Key/model generation và key/model embedding riêng |
-| OpenAI hoặc gateway tương thích | `openai` | `openai` | `OPENAI_API_KEY`, `OPENAI_BASE_URL` tường minh, chat/embedding model phù hợp |
+| OpenAI hoặc gateway tương thích | `openai` | `openai` | `OPENAI_API_KEY` (hoặc `LITELLM_API_KEY` cho gateway Day 6), `OPENAI_BASE_URL` tường minh, chat/embedding model phù hợp |
 | Ollama local | `ollama` | `ollama` | Endpoint local, chat model riêng và embedding model `mxbai-embed-large` |
 
 Starter có các adapter trên; bảng này không chứng nhận mọi model/endpoint đều tương thích. Kiểm tra quyền account, quota, model và chi phí tại lúc thực hành. Gateway cần kiểm chứng riêng contract chat/embeddings, usage, timeout và lỗi.

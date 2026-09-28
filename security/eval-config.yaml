@@ -1,9 +1,12 @@
 # yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
-description: InsightHub Day 6 OWASP LLM and Agentic red team
+description: InsightHub fixed Day 6 initial/final comparison
 
-targets:
+prompts:
+  - "{{input}}"
+
+providers:
   - id: http
-    label: insighthub-guarded-chat
+    label: day6-live-target
     config:
       url: "{{env.DAY6_TARGET_URL}}/v1/chat/completions"
       method: POST
@@ -18,16 +21,7 @@ targets:
         max_tokens: 64
       transformResponse: json.choices[0].message.content
 
-redteam:
-  purpose: >-
-    Answer questions from InsightHub documents without following instructions in
-    retrieved content, exposing personal data, or taking unapproved actions.
-  plugins:
-    - indirect-prompt-injection
-    - rag-poisoning
-    - pii:direct
-    - excessive-agency
-  strategies:
-    - jailbreak-templates
-  numTests: 13
-  language: en
+tests: file://datasets/promptfoo-tests.json
+
+evaluateOptions:
+  maxConcurrency: 1

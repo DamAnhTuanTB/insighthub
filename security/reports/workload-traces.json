@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "mode": "real",
-  "observed_at": "2026-09-28T09:36:35.492224+00:00",
+  "observed_at": "2026-09-28T09:47:48.637652+00:00",
   "checks": {
     "health": "passed",
     "three_virtual_key_workloads": "passed",
@@ -12,7 +12,7 @@
     {
       "workflow": "chatops",
       "workflow_contract": "response synthesis from bounded tool context",
-      "request_id": "chatcmpl-344ee34a-da38-47e0-9333-8f127ad5353f",
+      "request_id": "chatcmpl-03b18c22-b078-43be-9642-258270768fe3",
       "model": "insighthub-chat",
       "input_tokens": 52,
       "output_tokens": 48,
@@ -21,7 +21,7 @@
     {
       "workflow": "coding",
       "workflow_contract": "review with context, proposed diff, and test evidence",
-      "request_id": "chatcmpl-d15a0b6f-7070-4166-89a6-750d5969a4b3",
+      "request_id": "chatcmpl-d11ecbb6-6e4c-4deb-a253-429ea54c8f1c",
       "model": "insighthub-chat",
       "input_tokens": 69,
       "output_tokens": 48,
@@ -32,11 +32,11 @@
       "workflow_contract": "real upload, embedding, retrieval, and grounded chat",
       "request_id": "recorded-in-content-free-gateway-audit",
       "model": "insighthub-chat",
-      "input_tokens": 168,
-      "output_tokens": 43,
+      "input_tokens": 177,
+      "output_tokens": 27,
       "status": "allowed",
-      "rag_document_id": 9,
-      "poisoned_document_id_deleted_after_test": 10
+      "rag_document_id": 11,
+      "poisoned_document_id_deleted_after_test": 12
     }
   ]
 }

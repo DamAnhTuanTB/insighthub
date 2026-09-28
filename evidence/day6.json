@@ -2,8 +2,8 @@
   "schema_version": 1,
   "day": 6,
   "mode": "real",
-  "observed_at": "2026-09-28T09:39:38.928930+00:00",
-  "source_sha256": "116ce9f3d0854dcda0d734eebb79436232e81f993080edc7a7009200f74e4ca8",
+  "observed_at": "2026-09-28T09:47:58.971121+00:00",
+  "source_sha256": "d3d127b7bb8daaf0c3a205a63e3cc5ce361864ea2bc0a04888e326bcd8f28e71",
   "artifacts": {
     "dataset": {
       "path": "security/datasets/day6-cases.json",
@@ -11,15 +11,15 @@
     },
     "eval_initial": {
       "path": "security/reports/eval-initial.json",
-      "sha256": "6a4563e2bc006af3d3d66a6d6565015c2057d89b58ce1b434d5277ea74adc3a8"
+      "sha256": "9c4d983eeee9d22105f9315d39558000f1f0c8b20babd412a0f162f1c409840a"
     },
     "eval_final": {
       "path": "security/reports/eval-final.json",
-      "sha256": "2f16020f5c618c7a99a773ac5a61c11621607cde5d0ac381623ad4cb2e629579"
+      "sha256": "30851dcd2c84d8bd1b521f22e0b3d5bf3c72d7a2455985ad83543e11cb25ba18"
     },
     "cost": {
       "path": "security/reports/cost-report.json",
-      "sha256": "c6ef87ebed3b9944cd031bab81c6c9edb8017af029a86dfcca687b6e96c5c619"
+      "sha256": "d93155d52e9c8c53eceb454b736d5f42e8b352214b257ebb1f6865ad35a48d3b"
     }
   },
   "review": {

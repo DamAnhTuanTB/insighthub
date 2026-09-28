@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "day": 5,
+  "mode": "live",
+  "observed_at": "2026-09-28T08:49:25Z",
+  "slack": {
+    "workspace": "InsightHub Dam Anh Tuan",
+    "channel": "alerts",
+    "app": "InsightHub-bot",
+    "transport": "http-events-api",
+    "request_url_verified": true,
+    "socket_mode_enabled": false,
+    "event_type": "app_mention"
+  },
+  "runtime": {
+    "queue": "redis-arq",
+    "tool_mode": "mcp",
+    "tool_backends": [
+      "kubernetes",
+      "prometheus"
+    ]
+  },
+  "observations": [
+    {
+      "intent": "health",
+      "prompt": "api healthy?",
+      "reply": "InsightHub healthy; không có pod lỗi.",
+      "reply_count": 1
+    },
+    {
+      "intent": "ingestion_count",
+      "prompt": "ingest count today?",
+      "reply": "Trong 24 giờ gần nhất, InsightHub ingest thành công 0 document.",
+      "reply_count": 1
+    },
+    {
+      "intent": "failing_pods",
+      "prompt": "which pods failing?",
+      "reply": "Không có pod lỗi.",
+      "reply_count": 1
+    }
+  ],
+  "security": {
+    "signed_request_verified": true,
+    "non_app_mention_events_ignored": true,
+    "worker_log_arguments": "event_id_only",
+    "secrets_recorded": false
+  }
+}

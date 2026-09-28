@@ -14,7 +14,7 @@ NAMESPACE ?= insighthub-dev
 KUBE_CONTEXT ?= $(shell kubectl config current-context 2>/dev/null)
 KUBECONFIG_PATH ?= $(if $(KUBECONFIG),$(KUBECONFIG),$(HOME)/.kube/config)
 
-.PHONY: up down test test-backend test-worker test-verifiers test-mcp test-day1 verify-day1 smoke tools build ci worker-logs day3-fmt day3-init day3-validate day3-lint day3-scan day3-policy day3-render day3-budget day3-static day3-local-plan day3-local-up day3-local-smoke day3-local-down day4-monitoring-up day4-app-up day4-rules day4-dashboard day4-slack day4-loadgen-up day4-loadgen-down day4-forward day4-stop-forward day4-status day4-incident-1 day4-incident-2 day4-incident-3 day4-samples day4-verify day4-down
+.PHONY: up down test test-backend test-worker test-verifiers test-mcp test-day1 verify-day1 smoke tools build ci worker-logs day3-fmt day3-init day3-validate day3-lint day3-scan day3-policy day3-render day3-budget day3-static day3-local-plan day3-local-up day3-local-smoke day3-local-down day4-monitoring-up day4-app-up day4-rules day4-dashboard day4-slack day4-loadgen-up day4-loadgen-down day4-forward day4-stop-forward day4-status day4-incident-1 day4-incident-2 day4-incident-3 day4-samples day4-verify day4-down test-day5 verify-day5 day5-local-pass day5-rbac day5-redis-up day5-redis-down
 up:
 	$(COMPOSE) up --build -d --wait
 down:
@@ -114,6 +114,21 @@ day4-verify:
 day4-down:
 	helm uninstall kube-prom-stack --namespace "$(MONITORING_NAMESPACE)" || true
 	kubectl delete namespace "$(MONITORING_NAMESPACE)" --ignore-not-found
+
+# ---- Day 5: local ChatOps contract and optional live Slack processes ----
+BOT_URL ?= http://127.0.0.1:8080
+test-day5:
+	INSIGHTHUB_REPO_ROOT="$(CURDIR)" $(VERIFY_PYTHON) -m pytest -c /dev/null -p no:cacheprovider tests/milestones/day5 chatops-bot/tests -v
+verify-day5:
+	$(VERIFY_PYTHON) -B scripts/verify.py day5 --evidence-dir evidence --bot-url "$(BOT_URL)" --bot-transport http
+day5-local-pass:
+	scripts/day5/local-pass.sh
+day5-rbac:
+	KUBE_CONTEXT="$(KUBE_CONTEXT)" NAMESPACE="$(NAMESPACE)" $(PYTHON) scripts/day5/setup_rbac.py
+day5-redis-up:
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.day5.yml up -d --wait redis
+day5-redis-down:
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.day5.yml stop redis
 test: test-verifiers test-backend test-worker test-mcp
 smoke:
 	$(PYTHON) scripts/verify.py smoke --api-url "$(API_URL)" --web-url "$(WEB_URL)"

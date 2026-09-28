@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "day": 5,
+  "mode": "real",
+  "observed_at": "2026-09-28T08:51:11Z",
+  "source_sha256": "d6635c4f9c224db5c8b7634d2406cfdae6e761a94c3bfc88ae870dce09a870b5",
+  "artifacts": {
+    "permissions": {
+      "path": "chatops-bot/app/permissions.py",
+      "sha256": "b44a217eca3ada2e503a1e4fddb1a18d7ec3a428c11a77aabaeb91345983f931"
+    },
+    "audit": {
+      "path": "evidence/day5-audit.json",
+      "sha256": "0998ba97520531d8df88b2f8df8eb52e664ee0c9d9886be2538d5d015ca90f30"
+    },
+    "live": {
+      "path": "evidence/day5-live.json",
+      "sha256": "738ea81de161c6eebec6ed162c2d8b2d7ad95a2d50b4d1db192463ccea0a232c"
+    }
+  },
+  "scope": "local runtime and behavioral contract plus separate live Slack E2E observation"
+}

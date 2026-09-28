@@ -1,0 +1,25 @@
+{
+  "events": [
+    {
+      "timestamp": "2026-09-28T08:23:47Z",
+      "event_id": "local-permission-deny",
+      "user": "local-verifier",
+      "action": "delete_namespace",
+      "decision": "denied",
+      "error_code": "ACTION_NOT_APPROVABLE"
+    },
+    {
+      "timestamp": "2026-09-28T08:23:47Z",
+      "event_id": "local-approval-gate",
+      "user": "local-verifier",
+      "action": "scale_deployment",
+      "decision": "approval_required",
+      "arguments": {
+        "deployment": "api",
+        "replicas": 2
+      },
+      "result": "short-lived approval issued"
+    }
+  ],
+  "scope": "local behavioral verification; no external Slack delivery"
+}

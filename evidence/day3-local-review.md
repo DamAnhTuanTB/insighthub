@@ -2,6 +2,14 @@
 
 Observed at: 2026-09-17T08:53:03Z
 
+Re-verified at 2026-09-29 on source `0a291d14082d4fcba353168fee15d0b75db22f440725bf1a10439159f33500af`
+(branch `feat/day7-showcase-local`, commit `4811e8e`): GitHub Actions run
+`36572814473` succeeded for fmt, lint, security-scan, policy-check, plan,
+cost-estimate and provenance; apply/smoke were skipped (`deploy_local=false`).
+Rendered deployment digest from that run:
+`619dc7d374fe778848fc50d687d06104e55711726a20155a4f59980749e4ae0f`. The digests
+below are the original 2026-09-17 record.
+
 ## Scope and provenance
 
 - Deployment profile: local Kubernetes on kind context `kind-insighthub-day2`.

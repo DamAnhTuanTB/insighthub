@@ -118,7 +118,8 @@ spec:
       app.kubernetes.io/instance: insighthub
       app.kubernetes.io/component: worker
   policyTypes: [Ingress, Egress]
-  ingress: []
+  ingress:
+    []
   egress:
     - to:
         - podSelector:
@@ -237,6 +238,7 @@ data:
   EMBEDDING_REVISION: "1"
   LLM_MAX_TOKENS: "1024"
   PROVIDER_TIMEOUT_SECONDS: "60"
+  WORKER_METRICS_PORT: "9101"
 
 ---
 # Source: insighthub/templates/api-service.yaml

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "day": 7,
-  "observed_at": "2026-09-29T12:49:44+00:00",
+  "observed_at": "2026-09-29T15:08:30+00:00",
   "currency": "USD",
   "measured_total_usd": 0.00158,
   "lab_budget_usd": 1.0,
@@ -16,15 +16,15 @@
       "source": [
         {
           "path": "evidence/day2.json",
-          "sha256": "8d10daaa78c192bef9dce0d0a1c6a702516719c48cba42c080b6bc7034bd73ab"
+          "sha256": "14981e789fa25ff894c7f8d527b0ee454729a7100604319a3d354a5d65064118"
         },
         {
           "path": "evidence/day3-local-deployment.yaml",
-          "sha256": "d35cd819650cff34ae4a36b05505f74ec07973ac11bea0fb05a26c4de615dd8b"
+          "sha256": "619dc7d374fe778848fc50d687d06104e55711726a20155a4f59980749e4ae0f"
         },
         {
           "path": "evidence/day4-review.md",
-          "sha256": "dfe30e61caf119776517395cdf9092547fae9bed1d0ffdf4ec891d23b2705a16"
+          "sha256": "365e74e05350da2249f91db4b2287ea1f883738b96dcccfafa184ce536c73391"
         }
       ]
     },
@@ -36,15 +36,15 @@
       "source": [
         {
           "path": "evidence/day6.json",
-          "sha256": "6983b8f0c62d38489a1eddc46e9430a66ba65ee2db667371c14a7c353ef9ca73"
+          "sha256": "a9dcb2277c6e3a04323852a5c029d8d689c7552ec3dafc27be69ca89f35869e5"
         },
         {
           "path": "evidence/day3-local-review.md",
-          "sha256": "7f4bfa1c9a803e949a820872cde1465cb56463902aefff39ef9066d0142098d3"
+          "sha256": "6a1ac1c44952543fa1fb6e75fc81ecaa1ece611b08ee8a5ea0095774a1478466"
         },
         {
           "path": "evidence/day4-review.md",
-          "sha256": "dfe30e61caf119776517395cdf9092547fae9bed1d0ffdf4ec891d23b2705a16"
+          "sha256": "365e74e05350da2249f91db4b2287ea1f883738b96dcccfafa184ce536c73391"
         }
       ]
     },
@@ -57,7 +57,7 @@
       "basis": "Declared local chargeback rates; Ollama has no provider invoice.",
       "source": {
         "path": "security/reports/cost-report.json",
-        "sha256": "d93155d52e9c8c53eceb454b736d5f42e8b352214b257ebb1f6865ad35a48d3b"
+        "sha256": "d8ff861576daeabe36d3c94fb16fa61262c6676eaadb6033d3b7541b2f726dca"
       }
     }
   ],

@@ -26,21 +26,36 @@ evidence có thể mở lại; trạng thái "Chờ owner" là việc máy khôn
 4. Chọn 1/4 roadmap (mục 13) và điền chi phí subscription coding host vào cost report.
 5. Chụp ảnh tương tác Slack cho Day 5; gửi bản nộp theo [`submission.md`](submission.md).
 
+## Xác minh tổng (2026-09-29)
+
+Evidence Day 1–6 được sinh lại trên cùng source
+`0a291d14082d4fcba353168fee15d0b75db22f440725bf1a10439159f33500af` rồi chạy
+`verify.py day7` một lượt với mọi service live. Báo cáo: `evidence/day7-verify.json`.
+
+| Check | Kết quả |
+|---|---|
+| day1–day6 | PASS, `runtime_verified=true` cả sáu |
+| full-project-review | INCOMPLETE theo thiết kế — screencast, self-evaluation, submission cần người review |
+
+Day 3 bind vào GitHub Actions run `36572814473`; Day 4 chạy lại đủ baseline 70
+phút và ba incident riêng (chi tiết trong `evidence/day4-review.md`); Day 5 live
+Slack giữ bản quan sát 2026-09-28 (`evidence/day5-live.json`), phần local contract
+được chạy lại.
+
 ## Tái lập
 
+Chốt source trước (fingerprint gồm `scripts/`, `Makefile`, ... — sửa sau khi sinh
+evidence làm mọi ngày stale). Verify tổng cần đồng thời: stack Day 6
+(`scripts/day6/up.sh`, API :8000/web :13000), bot Day 5 ở :18080, Prometheus
+port-forward :9090 và một CI run trên đúng commit:
+
 ```bash
-make up                                # 5 service Compose, volumes giữ nguyên
-make smoke API_URL=http://127.0.0.1:$API_PORT WEB_URL=http://127.0.0.1:$WEB_PORT  # port lấy từ .env (máy này: 8001/3001)
-python3 scripts/day7/cost_report.py    # sinh lại evidence/day7-cost-report.json
-python3 scripts/verify.py day7 --evidence-dir evidence
-make down                              # không xóa volume
+python3 scripts/day7/cost_report.py
+.venv/bin/python -B scripts/verify.py day7 --evidence-dir evidence \
+  --api-url http://127.0.0.1:8000 --web-url http://127.0.0.1:13000 \
+  --prometheus-url http://127.0.0.1:9090 --bot-url http://127.0.0.1:18080 --bot-transport http \
+  --ci-profile github --ci-repo DamAnhTuanTB/insighthub --ci-run-id <run-id> \
+  --test-timeout 900 --timeout 30
 ```
 
-`verify.py day7` chạy lại verifier Day 1–6 và luôn kết thúc `INCOMPLETE` với
-check `full-project-review`: phần showcase/submission cần người review.
-
-Lần chạy 2026-09-29 dừng sớm hơn check đó: evidence Day 1–6 quá 24h
-(`--max-age-hours`), và ngay cả khi nới tuổi thì `source_sha256` của từng ngày
-cũng khác source hiện tại vì các ngày sau đã sửa code. Đây là chính sách chống
-stale evidence của verifier, không phải lỗi runtime. Muốn verifier xanh lại phải
-chạy lại live pipeline từng ngày trên source cuối rồi sinh lại evidence.
+Evidence phải dưới 24h khi verify (`--max-age-hours`).

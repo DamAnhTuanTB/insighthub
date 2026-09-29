@@ -2,8 +2,8 @@
   "schema_version": 1,
   "day": 1,
   "mode": "real",
-  "observed_at": "2026-09-10T08:41:58Z",
-  "source_sha256": "6b09c65ace26dbb7d22821acec4e5670734bedff6d09c75648727f3aacf32331",
+  "observed_at": "2026-09-29T13:05:28Z",
+  "source_sha256": "0a291d14082d4fcba353168fee15d0b75db22f440725bf1a10439159f33500af",
   "artifacts": {
     "refactor": {
       "path": "api/app/routers/documents.py",
@@ -15,7 +15,7 @@
     },
     "worker": {
       "path": "ingestion-worker/worker.py",
-      "sha256": "6e5694ee424c7cd279b8f0d92a34b57507ff83754edc48647ea5c30793156adc"
+      "sha256": "6739e1eb6ce048e72406877ca69bad553052ae2dab7520c8f85bb125e86858e4"
     },
     "worker_dockerfile": {
       "path": "ingestion-worker/Dockerfile",

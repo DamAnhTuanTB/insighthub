@@ -2,14 +2,14 @@
   "schema_version": 1,
   "mode": "real",
   "currency": "USD",
-  "observed_at": "2026-09-28T09:47:37.486977+00:00",
-  "source_sha256": "d3d127b7bb8daaf0c3a205a63e3cc5ce361864ea2bc0a04888e326bcd8f28e71",
+  "observed_at": "2026-09-29T13:09:41.514865+00:00",
+  "source_sha256": "0a291d14082d4fcba353168fee15d0b75db22f440725bf1a10439159f33500af",
   "budget_usd": 1.0,
   "total_usd": 0.00158,
   "pricing_basis": "Declared local chargeback rates; Ollama has no provider invoice.",
   "entries": [
     {
-      "request_id": "guardrail-7f2ce14d60424fb0a7649411ceb9ab9d",
+      "request_id": "guardrail-942f04664641493c868a7550cb26e9c4",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -19,12 +19,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.010808582999743521,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.011293499992461875,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-55cb295d62734e38b0ca1dfa2f0cd0f0",
+      "request_id": "guardrail-ff1032bce1e849808e19a1164a75d638",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -34,12 +34,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.001964292001503054,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0016827910003485158,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-5b811cf9abaf45c0aef33d8619344269",
+      "request_id": "guardrail-8d2d2d1a973c4c22a3305c0c0f2d781c",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -49,12 +49,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0013685419980902225,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0009685840050224215,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-7480dbedadeb4a9faf9e9636380c5413",
+      "request_id": "guardrail-bdb8c85811a24a82956c5d04c616dc2d",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -64,12 +64,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0008618749998277053,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007869590044720098,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-57c109a4d76b4eb58cf9d414d42bd4e9",
+      "request_id": "guardrail-e59a3febb77c428b9738e586faf9370d",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -79,12 +79,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007415830004902091,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.000894374999916181,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-75cdf889cc08460e9d2cc5d95c2b4977",
+      "request_id": "guardrail-9fb86c543c074740a5e7a74186d9d0cd",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -94,12 +94,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0009968749982363079,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0008381249936064705,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-8392bde441ac4c8b8010fac720e68ad0",
+      "request_id": "guardrail-886736ec3b3f4180a2cc542e63c6c0cd",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -109,12 +109,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0008727499989618082,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.000857624996569939,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-f872f7211c2f465392515ffb7ab5dad3",
+      "request_id": "guardrail-f20b2342ef30413aa4c1238ef973a4e5",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -124,12 +124,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0019277500032330863,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0010615000064717606,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-7920fbb716f74aca81c9a85e11e83979",
+      "request_id": "guardrail-fb88777762094fa3ad55eaa05370c499",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -139,12 +139,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0014017499997862615,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007804159977240488,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-2ca86d25612a4dce99b479d0d6e3b6d1",
+      "request_id": "guardrail-54f11500b1d94d06b9f52e11ae131ca6",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -154,12 +154,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0021257500011415686,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007994170009624213,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-5095cf6a2bdd413fa4856672b683df6d",
+      "request_id": "guardrail-d6d78aafb967426c9d93675f5c1d1051",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -169,12 +169,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0009802499989746138,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0008969999908003956,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-b53c6745db7348ad9504c7102beab98d",
+      "request_id": "guardrail-3f25c0bcacaa4ada9a2525cc068baa94",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -184,12 +184,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007810839997546282,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.00112749999971129,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-67a17c746f9a49ceaa3fc13b0f24d706",
+      "request_id": "guardrail-6b96dfadf6da4126a211fece797324a4",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -199,12 +199,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0010123329993803054,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0011734580039046705,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-4d79ca1f2eab4715ae704469d9039a56",
+      "request_id": "guardrail-af287a5a72634a65b40be1da9097e3dd",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -214,12 +214,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007866659980209079,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007951660081744194,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-2b778bbde1204190bf7bc2571405a14f",
+      "request_id": "guardrail-eb18b9f3e1c046aa967d8bc4102cd96c",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -229,12 +229,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0017562920002092142,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.000792499995441176,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-45c48d7da04349079a2c6884d993811a",
+      "request_id": "guardrail-23805de85d914a96878cd00f80131481",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -244,12 +244,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0015388749998237472,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0017095840012189,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-854f58c1c5d84e17a28125ad955134ff",
+      "request_id": "guardrail-a0a56b5d12b643048f7ad044ce48499e",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -259,12 +259,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.00118583400035277,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007639169925823808,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-13a69e84ec52414d8aeca1fea71f62c1",
+      "request_id": "guardrail-389d9075424a495c9f3c0b126ce4f497",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -274,12 +274,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0020834590031881817,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0009977089939638972,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-887f11881bc947e9b97aed9266298099",
+      "request_id": "guardrail-6991f90d66524e9a9b4e013f3890b6b4",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -289,12 +289,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0015564579989586491,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0021957910066703334,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-7b5e536b69e44c08919f3bda6d3d6cbc",
+      "request_id": "guardrail-fbbc1878301445218fb43996d0b61489",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -304,12 +304,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0008794999994279351,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007661669951630756,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-200f41683c1544cb9e705f510f240bb8",
+      "request_id": "guardrail-2f74eb3626b445f6876cdcfc8cf67822",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -319,12 +319,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0008088329996098764,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007807079964550212,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-8f221abecd9d401b816905011bfc3b97",
+      "request_id": "guardrail-c5af275ddcf148e6a801b095de27f8e0",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -334,12 +334,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0012187499996798579,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0020310830004746094,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-384ce8b06dc044fda07c3b7804349383",
+      "request_id": "guardrail-7bc7ecc6efeb4bb09b0f57f685eeb5af",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -349,12 +349,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.000912750001589302,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007220000115921721,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-93db22be4c4e4a149b09405a37afc053",
+      "request_id": "guardrail-9c53007d4c14410783ba5dd435b5815d",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -364,12 +364,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0011506670016387943,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007240410050144419,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-51dee426b9a244ff946781c3f5a99a96",
+      "request_id": "guardrail-6e0b15eaf66c4fe2bbae715b9349fa56",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -379,12 +379,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0011112499996670522,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007013750000623986,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-1a5116db79f6410fa6fad1823060b983",
+      "request_id": "guardrail-e753120c4d8e433ab5c14878f0d302e0",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -394,12 +394,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0009717499997350387,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0009657079936005175,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-e7fe0dcba9ab4028ae86ab3b6c0d0840",
+      "request_id": "guardrail-11ee0a539d754190af5baeea0dc0b0fa",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -409,12 +409,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0019506669996189885,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007544170075561851,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-25f8bc1419ef478d91b6ca5978d82939",
+      "request_id": "guardrail-56cf1e84e5e140ce8ec31b7a54b2897c",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -424,12 +424,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0018715840014920104,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0008178330026566982,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-0033f4a7a23244558c55e1692b981c3a",
+      "request_id": "guardrail-5f14ff98b0b442d6ac7e27e7c65e09ad",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -439,12 +439,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.001117125000746455,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007418330060318112,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-32e240e81bbc4fc4ab2d75f184f067ff",
+      "request_id": "guardrail-b8f6717cf7744d2c9e6b73ab32d08217",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -454,12 +454,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0009588329994585365,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0025549169949954376,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-2f04c5bad5524ed3b215f1ac2b4a8127",
+      "request_id": "guardrail-262a92108e644d6d89305a9438a26f33",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -469,12 +469,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0017306250010733493,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0006852079968666658,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-279775b159ba44ec8633064f95d370e0",
+      "request_id": "guardrail-233808f45be34e2497c35773eb90293d",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -484,12 +484,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0008416249984293245,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0018027080077445135,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-6a23eb097dbc417286bbd7501a6b2830",
+      "request_id": "guardrail-75eb49459a6342c58397b31bc81688b4",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -499,12 +499,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.001339499998721294,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0022373749961843714,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-01723f9ca5dc498384add909c0c3cc0b",
+      "request_id": "guardrail-1fd5f57ee3f6499fbb166ebae7273509",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -514,12 +514,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0020184999993944075,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007326669874601066,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-0cfd743b7b7c4f7cb90de4e806fe5b44",
+      "request_id": "guardrail-f6d55defde5541d38e7df6adf3d3d95b",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -529,12 +529,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007972499988682102,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0006996669981162995,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-304e1de230584dc2878bc3e1534dbb91",
+      "request_id": "guardrail-952201a453c6424f8a11831cfe3e207a",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -544,12 +544,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.000879540999449091,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0006421250000130385,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-0e593b358a114c9c852d175bfee028be",
+      "request_id": "guardrail-63b6aacd6907445eabf7e37fdb23c7c0",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -559,12 +559,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.000754167002014583,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0006575419974979013,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-bd21d13344724484aae842602a2af002",
+      "request_id": "guardrail-a667d196d5114905a9aba860c41e62c6",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -574,12 +574,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007268750014191028,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007692500075791031,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-56e81bdd7bf241beb90f37cb36ce473b",
+      "request_id": "guardrail-43b634aad1284a6aa83567443c1296b7",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -589,12 +589,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0008702499981154688,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0006285409908741713,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-56ebbf06c3c64e62a173f729ad94f627",
+      "request_id": "guardrail-c2fadafb9648457d93030efb5e1b5252",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -604,12 +604,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0021171660009713378,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0006538750021718442,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-f6a37985cd844a4d9a76a5e5fe67b328",
+      "request_id": "guardrail-ae0faaeead8049049c114eb1aede5c96",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -619,12 +619,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0016660829969623592,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.001508541012299247,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-43b17c4ffe54458ca24d54299063bb11",
+      "request_id": "guardrail-8bd2df1388af42cab008daa5afa01a9d",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -634,12 +634,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0020032080028613564,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0016138329956447706,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-60fb16859c1f4d1198415ba241e23e63",
+      "request_id": "guardrail-4234ab358b43467c9acdabbcbf87cd2f",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -649,12 +649,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007804580018273555,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0008697080047568306,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-31a748a7d94c49938c73b89cc31d54c3",
+      "request_id": "guardrail-51faea358bae4fa1821564af8e53d591",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -664,12 +664,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007437499989464413,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0013127090060152113,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-5df21d9fa4d4467bb95410ebca955446",
+      "request_id": "guardrail-dc0cad5eff534effa23753453484a388",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -679,12 +679,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007397909976134542,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0008834999898681417,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-bf3ee1cf3f044e53a577d820243440f1",
+      "request_id": "guardrail-a18f6d906f3b4534ba43e9c5f4bb0d3f",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -694,12 +694,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.002236665997770615,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007718749984633178,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-5de4aeb382c4446dbde1d2ee9012786e",
+      "request_id": "guardrail-7d8c4b0ec95b4bdd99b62a2a80000810",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -709,12 +709,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0019597499995143153,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007369999948423356,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-cac95c915c25416792ffcfe0f1c729e6",
+      "request_id": "guardrail-e91be6203c6e4254881110af909b69de",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -724,12 +724,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0022695420011586975,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007546249980805442,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-16e701e66cd843ee91ede53baa735a57",
+      "request_id": "guardrail-5e9c209ecedb44b39e893731b8fe4dd4",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -739,12 +739,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0008466250001220033,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0007577919895993546,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-4f809471396f43c587d8e78a49ff62c4",
+      "request_id": "guardrail-9789198175594167b2a9e8ff562a472d",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -754,12 +754,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0007582079997519031,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.001953958999365568,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-7ab2f107722f45f492542b585c9d78b4",
+      "request_id": "guardrail-6368740b34be451f8b73d843162a61d4",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -769,12 +769,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0012337080006545875,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.0009923750039888546,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "guardrail-d05f8a778f854006b48ad50bb41da8f5",
+      "request_id": "guardrail-7db9c8a1f86d4c7e8e27da7a292651b6",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 0,
@@ -784,12 +784,12 @@
       "cost_usd": 0.0,
       "resource_usage": {
         "measurement_source": "security-gateway cgroup v2",
-        "duration_seconds": 0.0019816659987554885,
-        "memory_peak_bytes": 70701056
+        "duration_seconds": 0.002169334009522572,
+        "memory_peak_bytes": 82219008
       }
     },
     {
-      "request_id": "chatcmpl-0438c5bd-4c32-422d-b395-320db7f66d95",
+      "request_id": "chatcmpl-607daceb-d26f-4ad4-9f79-512333681d80",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 44,
@@ -799,7 +799,7 @@
       "cost_usd": 0.000154
     },
     {
-      "request_id": "chatcmpl-1615d0d1-7e45-418c-a0f3-1a3466a9e54d",
+      "request_id": "chatcmpl-8b7a3122-4fcf-471a-99e8-ce0720e354d4",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 43,
@@ -809,7 +809,7 @@
       "cost_usd": 0.000171
     },
     {
-      "request_id": "chatcmpl-a3dd4f55-d5b7-4d0e-b125-08cb79fd3c9d",
+      "request_id": "chatcmpl-2d6fad1d-3f91-47b2-9728-540c7f55a617",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 40,
@@ -819,7 +819,7 @@
       "cost_usd": 0.000168
     },
     {
-      "request_id": "chatcmpl-0334d76a-c8d8-45ed-893b-6f513af30bc4",
+      "request_id": "chatcmpl-50dac804-19c9-4394-a20f-bb4f858c4410",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 40,
@@ -829,7 +829,7 @@
       "cost_usd": 0.000168
     },
     {
-      "request_id": "chatcmpl-e280e168-ceb7-44b0-892e-2fe398df888e",
+      "request_id": "chatcmpl-666f30a0-c9ff-46be-a139-0ac812071788",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 42,
@@ -839,7 +839,7 @@
       "cost_usd": 0.00017
     },
     {
-      "request_id": "chatcmpl-136f1345-b0f3-4c30-9d03-509b03acbfb4",
+      "request_id": "chatcmpl-d1d6342d-861e-4583-9bc2-2aefa68451c5",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 41,
@@ -849,7 +849,7 @@
       "cost_usd": 0.000169
     },
     {
-      "request_id": "chatcmpl-bce89f92-a3ff-44b4-9aac-eefa53ed610d",
+      "request_id": "chatcmpl-56cac1bb-a0f2-4742-b386-0b26e8d40d61",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 42,
@@ -859,7 +859,7 @@
       "cost_usd": 0.00017
     },
     {
-      "request_id": "chatcmpl-c7944223-29ec-41e4-b0ad-cb038303e84a",
+      "request_id": "chatcmpl-61472341-cd83-465e-8fcf-e0ebce840635",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 40,
@@ -869,7 +869,7 @@
       "cost_usd": 0.000168
     },
     {
-      "request_id": "chatcmpl-f180a39b-e57c-45ca-9961-151506914f27",
+      "request_id": "chatcmpl-bfe8c835-caf7-4f0d-90d0-ff754236c4e7",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 44,
@@ -879,7 +879,7 @@
       "cost_usd": 0.000172
     },
     {
-      "request_id": "chatcmpl-0173e05b-551b-4bda-a70c-07dd782bb9ea",
+      "request_id": "chatcmpl-c2b2e3cd-2fef-42bf-b18b-e88b87f15503",
       "workflow": "insighthub-security-eval",
       "model": "qwen2.5:0.5b",
       "input_tokens": 44,

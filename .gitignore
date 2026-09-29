@@ -60,6 +60,7 @@ evidence/*
 !evidence/day6.json
 !evidence/day6-*.json
 !evidence/day6-*.md
+!evidence/day7-*.json
 reports/
 !security/reports/
 !security/reports/**

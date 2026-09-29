@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "day": 7,
+  "observed_at": "2026-09-29T15:08:30+00:00",
+  "currency": "USD",
+  "measured_total_usd": 0.00158,
+  "lab_budget_usd": 1.0,
+  "within_budget": true,
+  "aws_running": false,
+  "lines": [
+    {
+      "day": "2-5",
+      "component": "Application LLM/embedding provider",
+      "cost_usd": 0.0,
+      "basis": "Labeled fixture provider (Day 2, Day 3 deployment, Day 4 no provider token series); the Day 5 bot calls MCP backends only, no LLM.",
+      "source": [
+        {
+          "path": "evidence/day2.json",
+          "sha256": "14981e789fa25ff894c7f8d527b0ee454729a7100604319a3d354a5d65064118"
+        },
+        {
+          "path": "evidence/day3-local-deployment.yaml",
+          "sha256": "619dc7d374fe778848fc50d687d06104e55711726a20155a4f59980749e4ae0f"
+        },
+        {
+          "path": "evidence/day4-review.md",
+          "sha256": "365e74e05350da2249f91db4b2287ea1f883738b96dcccfafa184ce536c73391"
+        }
+      ]
+    },
+    {
+      "day": "3-6",
+      "component": "AWS (EKS/RDS/ElastiCache/Budgets)",
+      "cost_usd": 0.0,
+      "basis": "No AWS resource was provisioned; all profiles ran on local Docker/kind.",
+      "source": [
+        {
+          "path": "evidence/day6.json",
+          "sha256": "a9dcb2277c6e3a04323852a5c029d8d689c7552ec3dafc27be69ca89f35869e5"
+        },
+        {
+          "path": "evidence/day3-local-review.md",
+          "sha256": "6a1ac1c44952543fa1fb6e75fc81ecaa1ece611b08ee8a5ea0095774a1478466"
+        },
+        {
+          "path": "evidence/day4-review.md",
+          "sha256": "365e74e05350da2249f91db4b2287ea1f883738b96dcccfafa184ce536c73391"
+        }
+      ]
+    },
+    {
+      "day": 6,
+      "component": "LiteLLM gateway -> Ollama (security eval)",
+      "cost_usd": 0.00158,
+      "budget_usd": 1.0,
+      "requests": 62,
+      "basis": "Declared local chargeback rates; Ollama has no provider invoice.",
+      "source": {
+        "path": "security/reports/cost-report.json",
+        "sha256": "d8ff861576daeabe36d3c94fb16fa61262c6676eaadb6033d3b7541b2f726dca"
+      }
+    }
+  ],
+  "unmeasured": [
+    {
+      "component": "Day 1 application provider",
+      "cost_usd": null,
+      "basis": "Day 1 evidence does not record the provider mode; owner confirms fixture or adds usage."
+    },
+    {
+      "component": "Coding agent host subscription (IDE/CLI quota)",
+      "cost_usd": null,
+      "basis": "Reported separately from API cost per specification; owner fills from own billing."
+    },
+    {
+      "component": "Slack workspace, HTTPS tunnel, GitHub account",
+      "cost_usd": null,
+      "basis": "No billing artifact in repository; owner confirms plan (free tier or paid)."
+    }
+  ]
+}

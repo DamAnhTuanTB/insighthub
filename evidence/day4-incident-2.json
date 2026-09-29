@@ -1,24 +1,24 @@
 {
   "incident_id": "incident-2",
-  "started_at": "2026-09-22T15:55:01Z",
-  "ended_at": "2026-09-22T16:16:11Z",
-  "failure_start": "2026-09-22T16:00:02Z",
-  "failure_end": "2026-09-22T16:10:02Z",
+  "started_at": "2026-09-29T14:42:26Z",
+  "ended_at": "2026-09-29T15:03:36Z",
+  "failure_start": "2026-09-29T14:47:27Z",
+  "failure_end": "2026-09-29T14:57:27Z",
   "title": "Ingestion queue backlog breached its anomaly band while no worker existed to drain it",
-  "summary": "Queue depth went from a flat zero baseline to 41 jobs for roughly ten minutes. The worker's own metrics stopped being produced entirely during that period, which is itself the diagnosis: there was no consumer, not a slow one.",
+  "summary": "The 5 minute average queue depth went from a flat zero baseline to 40.5 jobs during the failure window (14:47:27Z-14:57:27Z) and back to 0 by 15:03:26Z. The worker's own metrics were absent for the whole window, which is itself the diagnosis: there was no consumer, not a slow one.",
   "hypotheses": [
-    "The backlog was real. insighthub:queue_depth:avg5m rose from 0.0 to 41.0 against a band of 0.0, and the underlying redis_key_size{key=\"arq:queue\"} held 41 then 42 continuously across the failure window, read straight from the ARQ sorted set in Redis.",
-    "No worker was consuming. insighthub_worker_queue_depth and insighthub_worker_up have no samples at all inside the failure window; the series resume only at 16:10:31, once the replacement pod started. A metric that is absent is not a metric reading zero.",
-    "This was absence, not slowness. A worker that was running but falling behind would still have been scraped, and its own gauge would have shown the depth climbing. The series vanishing altogether points at the consumer being gone rather than overloaded.",
-    "Kubernetes confirms it independently: the only worker pod in the namespace is 7m46s old at the time of this analysis, created after the failure window closed, so no worker pod existed while the backlog accumulated.",
-    "The recovery closes the loop. redis_key_size returned to 0 within one scrape interval of the worker being restored, meaning all 42 queued jobs drained once a consumer existed again - which would not happen if the jobs themselves were the problem."
+    "The backlog was real. insighthub:queue_depth:avg5m rose from 0.0 at 14:42:26Z to 40.5 at 14:52:56Z against an anomaly band of 0.0, consistent with the 40 uploads the injection accepted into a queue nobody drained.",
+    "No worker was consuming. insighthub_worker_queue_depth and insighthub_worker_up have no samples inside the failure window; the first collected samples are at 14:57:56Z, after the worker was restored. A metric that is absent is not a metric reading zero.",
+    "This was absence, not slowness. A worker that was running but falling behind would still have been scraped and its own gauge would have shown the depth climbing. The series vanishing altogether points at the consumer being gone rather than overloaded.",
+    "Kubernetes confirms it independently: the only worker pod, insighthub-worker-6856cd9674-2zj72, has creationTimestamp 2026-09-29T14:57:27Z, exactly the failure window end, so no worker pod existed while the backlog accumulated.",
+    "Recovery closes the loop. insighthub_worker_up read 1 from 14:57:56Z and insighthub:queue_depth:avg5m was back to 0.0 at 15:03:26Z, so the queued jobs drained once a consumer existed again, which would not happen if the jobs themselves were the problem."
   ],
   "root_cause": "scripts/chaos/inject-queue-backlog.sh scaled the worker deployment to zero and uploaded 40 documents, so the API kept accepting work (202) while nothing consumed the queue. The API and the queue stayed healthy throughout; only the consumer was missing.",
   "confidence": 0.96,
   "correlation": [
-    "Queue depth measured from Redis rose while the worker's own metrics were entirely absent, which distinguishes 'no consumer' from 'slow consumer'.",
-    "The pod age observed through the Kubernetes API corroborates the metric gap without relying on the same data source.",
-    "Depth collapsed to zero immediately on worker restoration, tying cause to effect in both directions."
+    "Queue depth rose while the worker's own metrics were entirely absent, which distinguishes 'no consumer' from 'slow consumer'.",
+    "The pod creation time read from the Kubernetes API corroborates the metric gap without relying on the same data source.",
+    "Depth returned to zero after worker restoration, and the band widened to 28.1501 only after recovery, tying cause to effect in both directions."
   ],
   "remediation": [
     "Restore the worker replica count; ARQ resumes pending jobs from Redis with no data loss.",
@@ -29,11 +29,11 @@
     "alert": "IngestionQueueBacklogAnomaly",
     "fired": true,
     "condition": "queue depth above mean+3*stddev of the offset one hour baseline, and above a 5 job floor, sustained for 2m",
-    "delivered_to": "Slack #alerts"
+    "delivered_to": "Slack #alerts (Alertmanager slack notifications increased, 0 failed)"
   },
   "evidence_source": {
     "prometheus_url": "http://127.0.0.1:9090",
-    "collected_at": "2026-09-22T16:16:12Z",
+    "collected_at": "2026-09-29T15:05:34Z",
     "collector": "scripts/day4/collect-samples.py",
     "note": "Every value below was read from Prometheus, not authored by a model."
   },
@@ -43,27 +43,13 @@
       "labels": {
         "container": "worker",
         "endpoint": "metrics",
-        "instance": "10.244.0.43:9101",
+        "instance": "10.244.0.31:9101",
         "job": "insighthub-worker",
         "namespace": "insighthub-dev",
-        "pod": "insighthub-worker-6856cd9674-7zd7h",
+        "pod": "insighthub-worker-6856cd9674-2zj72",
         "service": "insighthub-worker"
       },
-      "timestamp": "2026-09-22T16:10:31Z",
-      "value": 2.0
-    },
-    {
-      "metric": "insighthub_worker_queue_depth",
-      "labels": {
-        "container": "worker",
-        "endpoint": "metrics",
-        "instance": "10.244.0.43:9101",
-        "job": "insighthub-worker",
-        "namespace": "insighthub-dev",
-        "pod": "insighthub-worker-6856cd9674-7zd7h",
-        "service": "insighthub-worker"
-      },
-      "timestamp": "2026-09-22T16:13:31Z",
+      "timestamp": "2026-09-29T14:57:56Z",
       "value": 0.0
     },
     {
@@ -71,63 +57,77 @@
       "labels": {
         "container": "worker",
         "endpoint": "metrics",
-        "instance": "10.244.0.43:9101",
+        "instance": "10.244.0.31:9101",
         "job": "insighthub-worker",
         "namespace": "insighthub-dev",
-        "pod": "insighthub-worker-6856cd9674-7zd7h",
+        "pod": "insighthub-worker-6856cd9674-2zj72",
         "service": "insighthub-worker"
       },
-      "timestamp": "2026-09-22T16:16:01Z",
+      "timestamp": "2026-09-29T15:00:56Z",
+      "value": 0.0
+    },
+    {
+      "metric": "insighthub_worker_queue_depth",
+      "labels": {
+        "container": "worker",
+        "endpoint": "metrics",
+        "instance": "10.244.0.31:9101",
+        "job": "insighthub-worker",
+        "namespace": "insighthub-dev",
+        "pod": "insighthub-worker-6856cd9674-2zj72",
+        "service": "insighthub-worker"
+      },
+      "timestamp": "2026-09-29T15:03:26Z",
       "value": 0.0
     },
     {
       "metric": "insighthub:queue_depth:avg5m",
       "labels": {},
-      "timestamp": "2026-09-22T15:55:01Z",
+      "timestamp": "2026-09-29T14:42:26Z",
       "value": 0.0
     },
     {
       "metric": "insighthub:queue_depth:avg5m",
       "labels": {},
-      "timestamp": "2026-09-22T16:05:31Z",
-      "value": 41.0
+      "timestamp": "2026-09-29T14:52:56Z",
+      "value": 40.5
     },
     {
       "metric": "insighthub:queue_depth:avg5m",
       "labels": {},
-      "timestamp": "2026-09-22T16:16:01Z",
+      "timestamp": "2026-09-29T15:03:26Z",
       "value": 0.0
     },
     {
       "metric": "insighthub:queue_depth:anomaly_upper",
       "labels": {},
-      "timestamp": "2026-09-22T15:55:01Z",
+      "timestamp": "2026-09-29T14:42:26Z",
       "value": 0.0
     },
     {
       "metric": "insighthub:queue_depth:anomaly_upper",
       "labels": {},
-      "timestamp": "2026-09-22T16:05:31Z",
+      "timestamp": "2026-09-29T14:52:56Z",
       "value": 0.0
     },
     {
       "metric": "insighthub:queue_depth:anomaly_upper",
       "labels": {},
-      "timestamp": "2026-09-22T16:16:01Z",
-      "value": 25.96186512309329
+      "timestamp": "2026-09-29T15:03:26Z",
+      "value": 28.150057300238302
     },
     {
       "metric": "insighthub_worker_up",
       "labels": {
         "container": "worker",
         "endpoint": "metrics",
-        "instance": "10.244.0.43:9101",
+        "instance": "10.244.0.31:9101",
         "job": "insighthub-worker",
         "namespace": "insighthub-dev",
-        "pod": "insighthub-worker-6856cd9674-7zd7h",
+        "pod": "insighthub-worker-6856cd9674-2zj72",
         "service": "insighthub-worker"
       },
-      "timestamp": "2026-09-22T16:10:31Z",
+      "timestamp": "2026-09-29T14:57:56Z",
       "value": 1.0
     },
     {
@@ -135,13 +135,13 @@
       "labels": {
         "container": "worker",
         "endpoint": "metrics",
-        "instance": "10.244.0.43:9101",
+        "instance": "10.244.0.31:9101",
         "job": "insighthub-worker",
         "namespace": "insighthub-dev",
-        "pod": "insighthub-worker-6856cd9674-7zd7h",
+        "pod": "insighthub-worker-6856cd9674-2zj72",
         "service": "insighthub-worker"
       },
-      "timestamp": "2026-09-22T16:13:31Z",
+      "timestamp": "2026-09-29T15:00:56Z",
       "value": 1.0
     },
     {
@@ -149,13 +149,13 @@
       "labels": {
         "container": "worker",
         "endpoint": "metrics",
-        "instance": "10.244.0.43:9101",
+        "instance": "10.244.0.31:9101",
         "job": "insighthub-worker",
         "namespace": "insighthub-dev",
-        "pod": "insighthub-worker-6856cd9674-7zd7h",
+        "pod": "insighthub-worker-6856cd9674-2zj72",
         "service": "insighthub-worker"
       },
-      "timestamp": "2026-09-22T16:16:01Z",
+      "timestamp": "2026-09-29T15:03:26Z",
       "value": 1.0
     }
   ]

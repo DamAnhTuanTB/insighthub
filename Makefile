@@ -14,7 +14,7 @@ NAMESPACE ?= insighthub-dev
 KUBE_CONTEXT ?= $(shell kubectl config current-context 2>/dev/null)
 KUBECONFIG_PATH ?= $(if $(KUBECONFIG),$(KUBECONFIG),$(HOME)/.kube/config)
 
-.PHONY: up down test test-backend test-worker test-verifiers test-mcp test-day1 verify-day1 smoke tools build ci worker-logs day3-fmt day3-init day3-validate day3-lint day3-scan day3-policy day3-render day3-budget day3-static day3-local-plan day3-local-up day3-local-smoke day3-local-down day4-monitoring-up day4-app-up day4-rules day4-dashboard day4-slack day4-loadgen-up day4-loadgen-down day4-forward day4-stop-forward day4-status day4-incident-1 day4-incident-2 day4-incident-3 day4-samples day4-verify day4-down test-day5 verify-day5 day5-local-pass day5-rbac day5-redis-up day5-redis-down day6-local-up day6-e2e test-day6 verify-day6 day6-local-pass day6-down
+.PHONY: up down test test-backend test-worker test-verifiers test-mcp test-day1 verify-day1 smoke tools build ci worker-logs day3-fmt day3-init day3-validate day3-lint day3-scan day3-policy day3-render day3-budget day3-static day3-local-plan day3-local-up day3-local-smoke day3-local-down day4-monitoring-up day4-app-up day4-rules day4-dashboard day4-slack day4-loadgen-up day4-loadgen-down day4-forward day4-stop-forward day4-status day4-incident-1 day4-incident-2 day4-incident-3 day4-samples day4-verify day4-down test-day5 verify-day5 day5-local-pass day5-rbac day5-redis-up day5-redis-down day6-local-up day6-e2e test-day6 verify-day6 day6-local-pass day6-down day7-cost-report verify-day7
 up:
 	$(COMPOSE) up --build -d --wait
 down:
@@ -144,6 +144,10 @@ day6-local-pass:
 	scripts/day6/local-pass.sh
 day6-down:
 	scripts/day6/down.sh
+day7-cost-report:
+	$(PYTHON) scripts/day7/cost_report.py
+verify-day7:
+	$(VERIFY_PYTHON) -B scripts/verify.py day7 --evidence-dir evidence --api-url "$(API_URL)" --web-url "$(WEB_URL)" --prometheus-url "$(PROMETHEUS_URL)" --bot-url "$(BOT_URL)" --bot-transport http --test-timeout 900 --timeout 30
 test: test-verifiers test-backend test-worker test-mcp
 smoke:
 	$(PYTHON) scripts/verify.py smoke --api-url "$(API_URL)" --web-url "$(WEB_URL)"

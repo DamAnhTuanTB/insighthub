@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "target": "day7",
+  "status": "INCOMPLETE",
+  "scope": "partial-runtime-contract",
+  "runtime_verified": false,
+  "source_sha256": "0a291d14082d4fcba353168fee15d0b75db22f440725bf1a10439159f33500af",
+  "milestone_complete": false,
+  "checks": [
+    {
+      "id": "day1",
+      "status": "PASS",
+      "runtime_verified": true,
+      "document_id": 21,
+      "filename": "verify-0992c3f6e326404b86c7e1b6cba51085.md",
+      "started_at": 1790694464.828041,
+      "upload_status": 202,
+      "note": "Pipeline smoke only; retrieval quality/provider effectiveness not evaluated. Uploaded document retained."
+    },
+    {
+      "id": "day2",
+      "status": "PASS",
+      "runtime_verified": true,
+      "sdk_result": {
+        "passed": true,
+        "backend_mode": "live",
+        "live": true,
+        "backend": "live-loopback",
+        "node": "v25.8.2",
+        "server": "@modelcontextprotocol/server@2.0.0",
+        "results": [
+          {
+            "client": "@modelcontextprotocol/client@2.0.0",
+            "mode": "modern",
+            "protocol": "2026-07-28",
+            "methods": [
+              "server/discover",
+              "tools/list",
+              "tools/call"
+            ],
+            "calls": [
+              "insighthub_health",
+              "insighthub_list_documents"
+            ],
+            "passed": true
+          },
+          {
+            "client": "@modelcontextprotocol/client@2.0.0",
+            "mode": "legacy",
+            "protocol": "2025-11-25",
+            "methods": [
+              "initialize",
+              "notifications/initialized",
+              "tools/list",
+              "tools/call"
+            ],
+            "calls": [
+              "insighthub_health",
+              "insighthub_list_documents"
+            ],
+            "passed": true
+          },
+          {
+            "client": "@modelcontextprotocol/sdk@1.30.0",
+            "mode": "v1",
+            "protocol": "2025-11-25",
+            "methods": [
+              "initialize",
+              "notifications/initialized",
+              "tools/list",
+              "tools/call"
+            ],
+            "calls": [
+              "insighthub_health",
+              "insighthub_list_documents"
+            ],
+            "passed": true
+          },
+          {
+            "client": "@modelcontextprotocol/client@2.0.0",
+            "mode": "auto",
+            "protocol": "2026-07-28",
+            "methods": [
+              "server/discover",
+              "tools/list",
+              "tools/call"
+            ],
+            "calls": [
+              "insighthub_health",
+              "insighthub_list_documents"
+            ],
+            "passed": true
+          }
+        ]
+      },
+      "note": "Real SDK subprocess and permission tests executed; backend mode explicitly recorded."
+    },
+    {
+      "id": "day3",
+      "status": "PASS",
+      "runtime_verified": true,
+      "ci_url": "https://github.com/DamAnhTuanTB/insighthub/actions/runs/36572814473",
+      "note": "CI/policy verified; deployment health is not attested."
+    },
+    {
+      "id": "day4",
+      "status": "PASS",
+      "runtime_verified": true,
+      "incidents_checked": 3,
+      "samples_checked": 36,
+      "note": "Three RCA telemetry contracts checked; alert delivery, panel coverage and MLOps knowledge still require specification review."
+    },
+    {
+      "id": "day5",
+      "status": "PASS",
+      "runtime_verified": true,
+      "tests": 11,
+      "bot_transport": "http",
+      "note": "Permission/approval/dedup and selected transport tested locally with audit; external Slack delivery not tested."
+    },
+    {
+      "id": "day6",
+      "status": "PASS",
+      "runtime_verified": true,
+      "cases": 62,
+      "note": "Executed local evaluation contract; provider identity/billing and dataset adequacy require review."
+    },
+    {
+      "id": "full-project-review",
+      "status": "INCOMPLETE",
+      "message": "Automated subset passed; full Must-have, showcase and submission review is required."
+    }
+  ],
+  "specification_review_required": true,
+  "note": "PASS covers implemented checks only, not all project requirements; use the complete specification and reviewer evidence."
+}

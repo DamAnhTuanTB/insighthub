@@ -65,6 +65,29 @@ and rollout-annotation series.
   Its scope stays `partial-runtime-contract`; `milestone_complete` is false and
   specification review is still required.
 
+## Re-verification 2026-09-29
+
+Rerun on source `0a291d14082d4fcba353168fee15d0b75db22f440725bf1a10439159f33500af`.
+Loadgen was redeployed at 13:04:46Z and `scripts/day4/run-incidents.sh` waited
+the full 70 minute baseline before the first injection. Three separate
+injections, each followed by `collect-samples.py` and `build-rca.py`:
+
+| # | Alert | Fired | Failure window (UTC) | Firing samples |
+|---|---|---|---|---|
+| 1 | LLMLatencyAnomaly | yes | 14:15:06-14:25:06 | 23 |
+| 3 | APIErrorRateAnomaly | yes | 14:31:19-14:41:19 | 18 |
+| 2 | IngestionQueueBacklogAnomaly | yes | 14:47:27-14:57:27 | 22 |
+
+The RCA analyses were rewritten against the new samples only; claims from the
+first run that had no collected sample (api CPU, `redis_key_size`, latency during
+incident 3) were removed. Incident 2's post-recovery band value was first
+collected ten seconds after its timestamp, before the recording rule evaluation
+settled (22.7437); samples were recollected after the windows closed (28.1501)
+and `scripts/verify.py day4` then matched all 36 citations against Prometheus.
+Alertmanager's `alertmanager_notifications_total{integration="slack"}` increased
+over the incident hour with zero failures. The tables below are the original
+2026-09-22 record.
+
 ## Incident results
 
 Baseline before the first injection: 124 minutes of continuous telemetry. The
